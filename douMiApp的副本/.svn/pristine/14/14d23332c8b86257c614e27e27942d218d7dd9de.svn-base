@@ -1,0 +1,13 @@
+//
+//  DMPayForPasswordViewController.h
+//  douMiApp
+//
+//  Created by edz on 2016/12/27.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface DMPayForPasswordViewController : UIViewController
+
+@end

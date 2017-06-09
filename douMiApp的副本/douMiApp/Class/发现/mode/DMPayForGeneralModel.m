@@ -1,0 +1,18 @@
+//
+//  DMRewardGeneralModel.m
+//  douMiApp
+//
+//  Created by edz on 2016/12/26.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DMPayForGeneralModel.h"
+
+@implementation DMPayForGeneralModel
+
+@end
+
+
+@implementation DMPayModel
+
+@end

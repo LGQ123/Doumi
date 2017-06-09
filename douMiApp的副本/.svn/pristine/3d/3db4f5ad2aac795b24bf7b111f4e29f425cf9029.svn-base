@@ -1,0 +1,21 @@
+//
+//  DTRewardTicketViewController.h
+//  douMiApp
+//
+//  Created by edz on 2016/12/27.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "RootNViewController.h"
+#import "DMRewardRootViewController.h"
+
+//ticketId:打赏券id ticketAmount：打赏券金额  ticketName：打赏券名称
+typedef void (^rewardTicketMessage) (NSString *ticketId, NSString *ticketAmount, NSString *ticketName);
+
+@interface DTRewardTicketViewController : DMRewardRootViewController
+
+@property (nonatomic, copy) rewardTicketMessage ticketBlock;
+
+- (instancetype)initWithTicketArray:(NSArray *)array;
+
+@end

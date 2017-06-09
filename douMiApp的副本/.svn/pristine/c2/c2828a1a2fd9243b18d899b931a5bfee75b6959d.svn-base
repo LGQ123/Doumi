@@ -1,0 +1,60 @@
+//
+//  DMPayForGeneralViewController.m
+//  douMiApp
+//
+//  Created by edz on 2016/12/26.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DMPayForGeneralViewController.h"
+#import "DMPayForPasswordViewController.h"
+
+@interface DMPayForGeneralViewController ()
+
+@end
+
+@implementation DMPayForGeneralViewController
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+//    self.view.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.4];
+    self.view.backgroundColor = [UIColor yellowColor];
+    
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 100, SCREEN_WIDTH, 300)];
+    view.backgroundColor = [UIColor whiteColor];
+    [self.view addSubview:view];
+    
+    UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(10, 20, 50, 40)];
+    button.backgroundColor = [UIColor redColor];
+    [button addTarget:self action:@selector(buttonClick) forControlEvents:UIControlEventTouchUpInside];
+    [view addSubview:button];
+    
+    
+    UIButton *payBtn = [[UIButton alloc] initWithFrame:CGRectMake(100, 100, 50, 30)];
+    payBtn.backgroundColor = [UIColor redColor];
+    [payBtn setTitle:@"支付" forState:UIControlStateNormal];
+    [payBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [payBtn addTarget:self action:@selector(payForButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    [view addSubview:payBtn];
+
+}
+
+- (void)buttonClick {
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+
+- (void)payForButtonClick {
+    DMPayForPasswordViewController *controller = [[DMPayForPasswordViewController alloc] init];
+//    [self.navigationController pushViewController:controller animated:YES];
+    [self presentViewController:controller animated:YES completion:nil];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+
+@end

@@ -1,0 +1,126 @@
+//
+//  ActivityController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/14.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "ActivityController.h"
+#import "ActivityCell.h"
+#import "RWebViewConreoller.h"
+#import "ActivityMode.h"
+
+@interface ActivityController ()<UITableViewDataSource,UITableViewDelegate>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+@property (strong, nonatomic) ActivityMode *mode;
+
+@end
+
+@implementation ActivityController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    [MobClick beginLogPageView:@"近期活动"];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"近期活动"];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    self.lable.text = @"近期活动";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    [_myTableView registerNib:[UINib nibWithNibName:@"ActivityCell" bundle:nil] forCellReuseIdentifier:@"ActivityCell"];
+    _myTableView.backgroundColor = RGBA(247, 247, 247, 1);
+    [self request_Api];
+    
+}
+
+- (void)request_Api {
+    __weak UITableView *tableView = self.myTableView;
+    
+    NSDictionary *dic = @{@"iface":@"DMHY200014"};
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        
+        _mode = [ActivityMode mj_objectWithKeyValues:responseObj];
+        
+        [tableView reloadData];
+        
+    } failure:^(NSError *error) {
+
+    }];
+
+    
+    
+    
+
+}
+
+#pragma mark-tableViewDelegate
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 1;
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return _mode.results.count;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return SCREEN_WIDTH*120/375;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 10;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    ActivityCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ActivityCell"];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.mode = _mode.results[indexPath.row];
+    return cell;
+
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    if (_mode.results[indexPath.row].status == 2) {
+        
+    } else {
+    RWebViewConreoller *webVC = [[RWebViewConreoller alloc] initWithNibName:@"RWebViewConreoller" bundle:nil];
+    webVC.titleStr = @"活动";
+    webVC.urlStr = _mode.results[indexPath.row].activityUrl;
+    NSLog(@"%@",webVC.urlStr);
+    [self.navigationController pushViewController:webVC animated:YES];
+    }
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

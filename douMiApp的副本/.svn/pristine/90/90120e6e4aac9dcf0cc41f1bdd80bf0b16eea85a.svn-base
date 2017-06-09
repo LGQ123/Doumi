@@ -1,0 +1,113 @@
+//
+//  DMMiFenQiViewController.m
+//  douMiApp
+//
+//  Created by ydz on 2017/1/10.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "DMMiFenQiViewController.h"
+#import "MiFenQiCell.h"
+#import "BrushLiRecordController.h"
+@interface DMMiFenQiViewController ()<UITableViewDelegate,UITableViewDataSource,miFenQiDelegate>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+
+@end
+
+
+
+@implementation DMMiFenQiViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    [self request_Api];
+}
+
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    [self addItem:nitem_right btnTitleArr:@[@"ask"]]; ///////// ask2图片不对
+    self.lable.text = @"蜜豆荚";
+     self.lable.textColor = RGBA(40, 40, 40, 1);
+    [_myTableView registerNib:[UINib nibWithNibName:@"MiFenQiCell" bundle:nil] forCellReuseIdentifier:@"MiFenQiCell"];
+}
+
+- (void)request_Api {
+    NSDictionary *dic = @{@"iface":@"DMHY500010",@"userId":[BusinessLogic uuid]};
+            [NetworkRequest post1:serVerIP params:dic
+                  success:^(id responseObj) {
+                      
+                  } failure:^(NSError *error) {
+    
+                  }];
+
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
+    return 1;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+-  (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 663;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+
+    return 0.01;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    MiFenQiCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MiFenQiCell"];
+    cell.delegate = self;
+    return cell;
+}
+
+
+#pragma miFenQiDelegate
+
+- (void)refundDelegate {//还款
+    
+}
+
+- (void)brushLiRecordDelegate {//刷礼记录
+    BrushLiRecordController *brushLiVC = [[BrushLiRecordController alloc] initWithNibName:@"BrushLiRecordController" bundle:nil];
+    [self.navigationController pushViewController:brushLiVC animated:YES];
+}
+
+- (void)brushLiDelegate {//刷礼
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

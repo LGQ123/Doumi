@@ -1,0 +1,132 @@
+//
+//  InteractViewController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/23.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "InteractViewController.h"
+#import "UITableViewCell+WHC_AutoHeightForCell.h"
+#import "DMInteractCell.h"
+#import "CheckEarlierCell.h"
+
+@interface InteractViewController ()<UITableViewDelegate,UITableViewDataSource,DMInteractDelegate>
+
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+
+@property (assign, nonatomic) BOOL *isOld;
+
+@end
+
+@implementation InteractViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    self.lable.text = @"互动";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    
+    [_myTableView registerClass:[DMInteractCell class] forCellReuseIdentifier:@"DMInteractCell"];
+    [_myTableView registerClass:[CheckEarlierCell class] forCellReuseIdentifier:@"CheckEarlierCell"];
+    _myTableView.backgroundColor = RGBA(247, 247, 247, 1);
+//    __weak __typeof(self) weakSelf = self;
+//    _myTableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+//        [weakSelf request_Api];
+//    }];
+//    
+//    _myTableView.mj_footer = [MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
+//        [weakSelf requestMore_Api];
+//    }];
+    [self request_Api];
+    
+    
+    
+}
+
+- (void)request_Api {
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    NSDictionary *dic = @{@"iface":@"DMHY300017",@"userId":[BusinessLogic uuid],@"type":@"0"};
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+        NSLog(@"%@",responseObj);
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        
+    }];
+    
+}
+
+- (void)requestMore_Api {
+    
+}
+
+
+#pragma mark- tab;eViewDelegate 
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 5;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 15;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return [DMInteractCell whc_CellHeightForIndexPath:indexPath tableView:tableView];
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    DMInteractCell *cell = [tableView dequeueReusableCellWithIdentifier:@"DMInteractCell"];
+    cell.delegate = self;
+    return cell;
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+
+}
+
+- (void)DMInteractTouch:(NSString *)ID {
+    
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

@@ -1,0 +1,58 @@
+//
+//  SuccessViewController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/12/29.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "SuccessViewController.h"
+
+@interface SuccessViewController ()
+@property (weak, nonatomic) IBOutlet UILabel *successLable;
+
+@end
+
+@implementation SuccessViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    
+    if (self.money.length ==0) {
+        
+    } else {
+        NSMutableAttributedString *noteStr = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"成功充值%@元",_money]];
+        NSRange redRange = NSMakeRange(4,_money.length );
+        [noteStr addAttribute:NSForegroundColorAttributeName value:RGBA(255, 42, 80, 1) range:redRange];
+        [self.successLable setAttributedText:noteStr] ;
+        
+    }
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

@@ -1,0 +1,246 @@
+//
+//  MyBackIdSController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/12/26.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "MyBackIdSController.h"
+#import "BoundClipController.h"
+#import "UIImage+MostColor.h"
+#import "BackIdsCell1.h"
+#import "MyBackMode.h"
+#import "AppDelegate.h"
+#import "YRSideViewController.h"
+#import "UINavigationController+FDFullscreenPopGesture.h"
+@interface MyBackIdSController ()<UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+@property (strong, nonatomic) MyBackMode *mybackMode;
+@end
+
+@implementation MyBackIdSController
+
+- ( void)viewWillDisappear:(BOOL)animated {
+    //    self.navigationController.fd_fullscreenPopGestureRecognizer.enabled = YES;
+    //    self.fd_interactivePopDisabled = NO;
+    AppDelegate *delegate=(AppDelegate*)[[UIApplication sharedApplication]delegate];
+    YRSideViewController *sideViewController=[delegate LeftSlideController];
+    sideViewController.needSwipeShowMenu=YES;//默认开启的可滑动展示
+}
+
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    
+    self.navigationController.fd_fullscreenPopGestureRecognizer.enabled = YES;
+    self.fd_interactivePopDisabled = YES;
+    AppDelegate *delegate=(AppDelegate*)[[UIApplication sharedApplication]delegate];
+    YRSideViewController *sideViewController=[delegate LeftSlideController];
+    sideViewController.needSwipeShowMenu=NO;//默认开启的可滑动展示
+    
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    
+    [self request_Api];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    
+    self.lable.text = @"我的银行卡";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    _myTableView.backgroundColor = RGBA(247, 247, 247, 1);
+    self.view.backgroundColor = RGBA(247, 247, 247, 1);
+    [_myTableView registerNib:[UINib nibWithNibName:@"BackIdsCell1" bundle:nil] forCellReuseIdentifier:@"BackIdsCell1"];
+}
+
+
+
+
+- (void)request_Api {
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    NSDictionary *dic = @{@"iface":@"DMHY400019",@"userId":[BusinessLogic uuid]};
+    
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        _mybackMode = [MyBackMode mj_objectWithKeyValues:responseObj];
+        if (_mybackMode.bank.length == 0) {
+            _myTableView.hidden = YES;
+           [self addItem:nitem_right btnTitleArr:@[@"加号"]];
+        } else {
+            _myTableView.hidden = NO;
+            [self addItem:nitem_right btnTitleArr:@[@"没有"]];
+            [_myTableView reloadData];
+        }
+        
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        
+    }];
+    
+    
+}
+
+- (void)showRightView:(UIButton *)btn {
+    if (_mybackMode.bank.length == 0) {
+        BoundClipController *boundClip = [[BoundClipController alloc] init];
+        [self.navigationController pushViewController:boundClip animated:YES];
+    } else {
+        
+        
+    
+    }
+}
+
+
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 1;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 10;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    BackIdsCell1 *cell = [tableView dequeueReusableCellWithIdentifier:@"BackIdsCell1"];
+    [cell.backIcon sd_setImageWithURL:[NSURL URLWithString:_mybackMode.bankInfo] placeholderImage:nil];
+    cell.backName.text = _mybackMode.bank;
+    cell.backId.text = _mybackMode.bankCard;
+    UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:_mybackMode.bankInfo]]];
+    cell.contentView.backgroundColor = [UIImage mostColor:image];
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath
+
+{
+    
+    //如果是删除
+    
+    if(editingStyle==UITableViewCellEditingStyleDelete)
+        
+    {
+        
+        //点击删除按钮调用这里的代码
+        
+        //        1.数据源删除
+        
+        //                @[indexPath]=[NSArray arrayWithObjects:indexPath,nil];
+        
+        
+        
+        //        2.UI上删除
+        
+        //删除表视图的某个cell
+        
+        /*
+         
+         第一个参数：将要删除的所有的cell的indexPath组成的数组
+         
+         第二个参数：动画
+         
+         */
+        
+        //        [tableView deleteRowsAtIndexPaths:[NSMutableArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        //将整个表格视图刷新也可以实现在UI上删除的效果，只不过它要重新执行一遍所有的方法，效率很低
+        
+        //        [tableView reloadData];
+        
+        
+        [self requestDelegate_Api:indexPath.row];
+        
+        
+    }
+    
+}
+
+//修改删除按钮为中文的删除
+
+-(NSString*)tableView:(UITableView*)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath*)indexPath
+
+{
+    
+    return @"解绑";
+    
+}
+
+//是否允许编辑行，默认是YES
+
+-(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+
+{
+    
+    return YES;
+    
+}
+
+-(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return UITableViewCellEditingStyleDelete;
+}
+
+//设置cell可移动
+
+- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    return YES;
+    
+}
+
+- (void)requestDelegate_Api:(NSInteger)row {
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    NSDictionary *dic = @{@"iface":@"DMHY400042",@"userId":[BusinessLogic uuid]};
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        if ([responseObj[@"rescode"] isEqualToString:@"0000"]) {
+            _myTableView.hidden = YES;
+            [self request_Api];
+        } else {
+            [LCProgressHUD showMessage:responseObj[@"resmsg"]];
+        }
+        
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        [LCProgressHUD showMessage:@"网络错误"];
+    }];
+   
+    
+}
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+@end

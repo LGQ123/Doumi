@@ -1,0 +1,422 @@
+//
+//  HTDetailsViewController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/22.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "HTDetailsViewController.h"
+#import "InteractViewController.h"
+#import "UITableViewCell+WHC_AutoHeightForCell.h"
+#import "HTHeaderCell.h"
+#import "HTCell.h"
+#import "HTPLCell.h"
+#import "GDPLCell.h"
+#import "ZDPLCell.h"
+#import "HTDetailsMode.h"
+#import "DTDetailsViewController.h"
+#import "IssueViewController.h"
+#import "DM_LoginController.h"
+#import "PersonageViewController.h"
+#import "DTRewardViewController.h"
+
+#import "UGCViewController.h"
+
+@interface HTDetailsViewController ()<UITableViewDelegate,UITableViewDataSource,ZDPLDelegate,HTDelegte>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+
+@property (strong, nonatomic) UIButton *gengduoBtn;
+@property (strong, nonatomic) UIButton *zanBtn;
+@property (strong, nonatomic) UIButton *daShangBtn;
+@property (strong, nonatomic) UIButton *plBtn;
+/** 导航条View */
+@property (nonatomic, weak) UIView *navBarView;
+
+@property (nonatomic, assign) NSInteger page;
+
+@property (nonatomic, strong) HTDetailsMode *mode;
+
+@property (nonatomic, strong) NSMutableArray <Talkdynamiclist*>*dataArr;
+
+@end
+
+
+
+@implementation HTDetailsViewController
+
+
+- (UIView *)navBarView {
+    if (!_navBarView) {
+        UIView *navBarView = [[UIView alloc] init];
+        navBarView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 64);
+        [self.view addSubview:navBarView];
+        self.navBarView = navBarView;
+    }
+    return _navBarView;
+}
+
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    
+    CGFloat offsetY = scrollView.contentOffset.y;
+    
+    if (offsetY > 10) {
+        
+        self.navBarView.backgroundColor = RGBA(0, 0, 0, 0.8);
+        
+    } else {
+        self.navBarView.backgroundColor = RGBA(0, 0, 0, 0);
+    }
+    
+    
+}
+
+
+//- (void)viewWillDisappear:(BOOL)animated {
+//    self.navigationController.navigationBar.hidden=NO;
+//    self.navigationItem.hidesBackButton = YES;
+//    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+//    
+//    [self.navigationController.navigationBar setShadowImage:nil];
+//    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+//    
+//}
+
+- (void)viewWillAppear:(BOOL)animated {
+    self.navigationController.navigationBar.hidden=NO;
+    self.navigationItem.hidesBackButton = YES;
+    [self.navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsCompact];
+    [self.navigationController.navigationBar setShadowImage:[UIImage new]];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:0];
+     [self request_Api];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    _dataArr = [[NSMutableArray alloc] init];
+    [self addItem:nitem_left btnTitleArr:@[@"BackW"]];
+    
+    _myTableView.backgroundColor = RGBA(247, 247, 247, 1);
+    [_myTableView registerNib:[UINib nibWithNibName:@"HTHeaderCell" bundle:nil] forCellReuseIdentifier:@"HTHeaderCell"];
+    [_myTableView registerClass:[HTCell class] forCellReuseIdentifier:@"HTCell"];
+    [_myTableView registerClass:[HTPLCell class] forCellReuseIdentifier:@"HTPLCell"];
+    [_myTableView registerNib:[UINib nibWithNibName:@"GDPLCell" bundle:nil] forCellReuseIdentifier:@"GDPLCell"];
+    [_myTableView registerClass:[ZDPLCell class] forCellReuseIdentifier:@"ZDPLCell"];
+    
+    _page = 1;
+    
+    __weak __typeof(self) weakSelf = self;
+    _myTableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        [weakSelf request_Api];
+    }];
+    
+    _myTableView.mj_footer = [MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
+        [weakSelf request_MoreApi];
+    }];
+   
+   
+}
+
+
+- (void)request_Api {
+    __weak UITableView *tableView = _myTableView;
+    _page = 1;
+    [_dataArr removeAllObjects];
+    NSDictionary *dic;
+    if ([BusinessLogic uuid].length == 0) {
+        dic = @{@"iface":@"DMHY200021",@"talkId":self.talkId,@"current":[NSString stringWithFormat:@"%ld",(long)_page]};
+        
+    } else {
+        dic = @{@"iface":@"DMHY200021",@"userId":[BusinessLogic uuid],@"talkId":self.talkId,@"current":[NSString stringWithFormat:@"%ld",(long)_page]};
+    }
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+        _mode = [HTDetailsMode mj_objectWithKeyValues:responseObj];
+        [_dataArr addObjectsFromArray:_mode.talkDynamicList];
+        self.lable.text = _mode.talkTitle;
+        [_myTableView reloadData];
+        if (_mode.talkDynamicList.count < 5) {
+            
+            [tableView.mj_footer endRefreshingWithNoMoreData];
+        } else {
+            [tableView.mj_footer endRefreshing];
+        }
+        [tableView.mj_header endRefreshing];
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+        [tableView.mj_header endRefreshing];
+    }];
+    
+}
+
+- (void)request_MoreApi {
+    __weak UITableView *tableView = _myTableView;
+    _page++;
+    NSDictionary *dic;
+    if ([BusinessLogic uuid].length == 0) {
+        dic = @{@"iface":@"DMHY200021",@"talkId":self.talkId,@"current":[NSString stringWithFormat:@"%ld",(long)_page]};
+        
+    } else {
+        dic = @{@"iface":@"DMHY200021",@"userId":[BusinessLogic uuid],@"talkId":self.talkId,@"current":[NSString stringWithFormat:@"%ld",(long)_page]};
+    }
+    
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+        _mode = [HTDetailsMode mj_objectWithKeyValues:responseObj];
+        [_dataArr addObjectsFromArray:_mode.talkDynamicList];
+        [_myTableView reloadData];
+        if (_mode.talkDynamicList.count < 5) {
+            
+            [tableView.mj_footer endRefreshingWithNoMoreData];
+        } else {
+            [tableView.mj_footer endRefreshing];
+        }
+        
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+         [tableView.mj_footer endRefreshing];
+    }];
+    
+
+}
+
+#pragma mark- tableViewDelegate
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if (section == 0) {
+        return 1;
+    } else {
+        return 2;
+    }
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return _dataArr.count+1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 10;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 0.01;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 0) {
+            return SCREEN_WIDTH*200/375;
+        
+    } else {
+        if (indexPath.row == 0) {
+            return [HTCell whc_CellHeightForIndexPath:indexPath tableView:tableView];
+        } else {
+            return 32;
+        }
+    }
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 0) {
+        HTHeaderCell *cell = [tableView dequeueReusableCellWithIdentifier:@"HTHeaderCell"];
+        [cell.headerImage sd_setImageWithURL:[NSURL URLWithString:_mode.picMaxUrl] placeholderImage:[UIImage imageNamed:@"dog"]];
+        cell.headerConnter.text = _mode.talkContent;
+        return cell;
+
+    } else {
+        if (indexPath.row == 0) {
+            HTCell *cell = [tableView dequeueReusableCellWithIdentifier:@"HTCell"];
+            [cell.btn1 setBackgroundImage:[UIImage imageNamed:@"操作"] forState:UIControlStateNormal];//新加的
+            cell.talkdynamicMode = _dataArr[indexPath.section-1];
+            cell.delegate = self;
+            cell.ID = indexPath.section-1;
+            return cell;
+        } else {
+            ZDPLCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ZDPLCell"];
+            cell.zanNumber = [NSString stringWithFormat:@"%ld",(long)_dataArr[indexPath.section-1].zanNum];
+            cell.plNumber = [NSString stringWithFormat:@"%ld",(long)_dataArr[indexPath.section-1].commentNum];
+            cell.Id = indexPath.section-1;
+            cell.ifZan = _dataArr[indexPath.section-1].zanStatus;
+            cell.delegate = self;
+            [cell.myCollec reloadData];
+            return cell;
+        }
+    
+    }
+
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (indexPath.section != 0) {
+        DTDetailsViewController *dtDetailsVC = [[DTDetailsViewController alloc] initWithNibName:@"DTDetailsViewController" bundle:nil];
+        dtDetailsVC.ID = [NSString stringWithFormat:@"%ld",(long)_dataArr[indexPath.section-1].dynId];
+        dtDetailsVC.zanNumber = [NSString stringWithFormat:@"%ld",(long)_dataArr[indexPath.section-1].zanNum];
+        [self.navigationController pushViewController:dtDetailsVC animated:YES];
+    }
+    
+}
+
+//新加的
+//分享
+- (void)btn1Delegate:(NSInteger)ID {
+    
+    [self showActionSheet:ID];
+    
+    
+}
+
+- (void)showActionSheet:(NSInteger)ID {
+    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:@"您好" message:@"可以进行如下操作" preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    UIAlertAction *reportAction = [UIAlertAction actionWithTitle:@"举报" style:(UIAlertActionStyleDefault) handler:^(UIAlertAction *action) {
+        [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [MBProgressHUD hideHUDForView:self.view animated:YES];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"" message:@"已举报，受理中" preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+            [alert addAction:action];
+            [self presentViewController:alert animated:YES completion:nil];
+            
+        });
+        
+        
+    }];
+    
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:(UIAlertActionStyleCancel) handler:^(UIAlertAction *action) {
+        // 点击按钮后的方法直接在这里面写
+    }];
+    
+    // 添加按钮 将按钮添加到UIAlertController对象上
+    [actionSheet addAction:reportAction];
+    [actionSheet addAction:cancelAction];
+    // 将UIAlertController模态出来 相当于UIAlertView show 的方法
+    [self presentViewController:actionSheet animated:YES completion:nil];
+    
+}
+//新加的
+
+
+
+
+
+
+// 点赞 打赏 评论
+
+- (void)CollecIndex:(NSInteger)index ID:(NSInteger)Id {
+    if (index == 0) {
+        NSLog(@"赞");
+        if ([BusinessLogic uuid].length == 0) {
+            DM_LoginController *logVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+            [self.navigationController pushViewController:logVC animated:YES];
+        } else {
+        __weak UITableView *tableView = _myTableView;
+        if ([BusinessLogic uuid].length == 0) {
+            DM_LoginController *loginVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+            [self.navigationController pushViewController:loginVC animated:YES];
+            
+        } else {
+        
+        NSDictionary *dic = @{@"iface":@"DMHY300003",@"userId":[BusinessLogic uuid],@"dynId":[NSString stringWithFormat:@"%ld",(long)_dataArr[Id].dynId],@"type":@"4"};
+        if (_dataArr[Id].zanStatus == 0) {
+            [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+                _dataArr[Id].zanStatus = 1;
+                _dataArr[Id].zanNum++;
+                [tableView reloadData];
+            } failure:^(NSError *error) {
+                
+            }];
+        } else {
+            [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+                _dataArr[Id].zanStatus = 0;
+                _dataArr[Id].zanNum--;
+                [tableView reloadData];
+            } failure:^(NSError *error) {
+                
+            }];
+        }
+        }
+        
+        }
+        
+    }
+    if (index == 1) {
+        NSLog(@"打赏");
+//         [self showAlertWithTitle:@"温馨提示" message:@"此功能暂未开通" handler:nil];
+        
+        if ([BusinessLogic uuid].length == 0) {
+            DM_LoginController *logVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+            [self.navigationController pushViewController:logVC animated:YES];
+            
+        } else {
+            
+            
+            if ([[BusinessLogic power] isEqualToString:@"Y"]) {
+                DTRewardViewController *controller = [[DTRewardViewController alloc] init];
+                controller.anchorId = [NSString stringWithFormat:@"%ld",(long)_dataArr[Id].talkUserId];
+                controller.dynId = [NSString stringWithFormat:@"%ld",(long)_dataArr[Id].dynId];
+                controller.channel = @"1";
+                [self presentViewController:controller animated:YES completion:nil];
+            } else {
+                DTDetailsViewController *dtDetailsVC = [[DTDetailsViewController alloc] initWithNibName:@"DTDetailsViewController" bundle:nil];
+                dtDetailsVC.ID = [NSString stringWithFormat:@"%ld",(long)_dataArr[Id].dynId];
+                dtDetailsVC.zanNumber = [NSString stringWithFormat:@"%ld",(long)_dataArr[Id].zanNum];
+                [self.navigationController pushViewController:dtDetailsVC animated:YES];
+            }
+        }
+        
+    }
+    if (index == 2) {
+        NSLog(@"评论");
+        DTDetailsViewController *dtDetailsVC = [[DTDetailsViewController alloc] initWithNibName:@"DTDetailsViewController" bundle:nil];
+        dtDetailsVC.ID = [NSString stringWithFormat:@"%ld",(long)_dataArr[Id].dynId];
+        dtDetailsVC.zanNumber = [NSString stringWithFormat:@"%ld",(long)_dataArr[Id].zanNum];
+        [self.navigationController pushViewController:dtDetailsVC animated:YES];
+    }
+
+}
+
+- (void)icDelegate:(NSInteger)ID {
+    PersonageViewController *PersonageVC = [[PersonageViewController alloc] initWithNibName:@"PersonageViewController" bundle:nil];
+    PersonageVC.UUID = [NSString stringWithFormat:@"%ld",(long)_dataArr[ID].talkUserId];
+    [self.navigationController pushViewController:PersonageVC animated:YES];
+    
+}
+
+- (IBAction)bianXieTou:(UIButton *)sender {
+    if ([BusinessLogic uuid].length == 0) {
+        DM_LoginController *loginVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+        [self.navigationController pushViewController:loginVC animated:YES];
+    } else {
+        if ([BusinessLogic UGC].length == 0) {
+            UGCViewController *ugc = [[UGCViewController alloc] init];
+            [self presentViewController:ugc animated:YES completion:nil];
+        } else {
+            IssueViewController *issueVC = [[IssueViewController alloc] initWithNibName:@"IssueViewController" bundle:nil];
+            issueVC.talkID = self.talkId;
+            [self.navigationController pushViewController:issueVC animated:YES];
+        }
+    }
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

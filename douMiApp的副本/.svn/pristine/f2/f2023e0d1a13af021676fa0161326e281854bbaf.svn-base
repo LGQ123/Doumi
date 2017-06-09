@@ -1,0 +1,45 @@
+//
+//  MEHomeMode.h
+//  douMiApp
+//
+//  Created by ydz on 2016/11/28.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface MEHomeMode : NSObject
+
+@property (nonatomic, copy) NSString *money;
+
+@property (nonatomic, copy) NSString *creditAmount;
+
+@property (nonatomic, copy) NSString *fansNum;
+
+@property (nonatomic, copy) NSString *imgUrl;
+
+@property (nonatomic, copy) NSString *msgFlag;
+
+@property (nonatomic, copy) NSString *redeemable;
+
+@property (nonatomic, copy) NSString *resmsg;
+
+@property (nonatomic, copy) NSString *isOnline;
+
+@property (nonatomic, copy) NSString *userId;
+
+@property (nonatomic, copy) NSString *anchorNum;
+
+@property (nonatomic, copy) NSString *nickName;
+
+@property (nonatomic, copy) NSString *usableAmount;
+
+@property (nonatomic, copy) NSString *role;
+
+@property (nonatomic, copy) NSString *rescode;
+@property (nonatomic, assign) NSInteger sex;
+@property (nonatomic, copy) NSString *individualitySignature;
+
+@property (nonatomic, copy) NSString *coverImgUrl;
+
+@end

@@ -1,0 +1,78 @@
+//
+//  RWebViewConreoller.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/22.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "RWebViewConreoller.h"
+
+@interface RWebViewConreoller ()<UIWebViewDelegate>
+@property (weak, nonatomic) IBOutlet UIWebView *myWebView;
+
+@end
+
+@implementation RWebViewConreoller
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    [MobClick beginLogPageView:self.titleStr];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:self.titleStr];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    self.lable.text = self.titleStr;
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+//    [_myWebView scalesPageToFit];
+     [_myWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.urlStr]]];
+    
+    NSLog(@"%@",self.urlStr);
+}
+
+- (void)showLeftView:(UIButton *)btn {
+    if ([_type isEqualToString:@"push"]) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+        
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+    
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    
+}
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

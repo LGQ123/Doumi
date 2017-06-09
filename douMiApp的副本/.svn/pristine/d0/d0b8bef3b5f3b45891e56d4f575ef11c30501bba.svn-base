@@ -1,0 +1,139 @@
+//
+//  MessageCenterCell.m
+//  douMiApp
+//
+//  Created by edz on 2016/12/29.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "MessageCenterCell.h"
+
+
+#define iconWH 60
+#define arrowW 15
+#define arrowH 15
+#define cellH 81
+#define numLabWH 21
+
+@interface MessageCenterCell ()
+
+@property (nonatomic, strong) UIImageView *iconImage;
+@property (nonatomic, strong) UILabel *titleLab;
+@property (nonatomic, strong) UILabel *dateLab;
+@property (nonatomic, strong) UILabel *contentLab;
+@property (nonatomic, strong) UIImageView *arrowImage;
+@property (nonatomic, strong) UILabel *numLab;
+@property (nonatomic, strong) UIImageView *lineImage;
+
+@end
+
+@implementation MessageCenterCell
+
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.backgroundColor = [UIColor whiteColor];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        _iconImage = [[UIImageView alloc] initWithFrame:CGRectMake(14, 11, iconWH, iconWH)];
+        _iconImage.backgroundColor = [UIColor clearColor];
+        _iconImage.layer.cornerRadius = iconWH/2;
+        _iconImage.clipsToBounds = YES;
+        [self addSubview:_iconImage];
+        
+        _titleLab = [self getLabelWithFrame:CGRectMake(_iconImage.mj_x+_iconImage.mj_w+9, _iconImage.mj_y, SCREEN_WIDTH-_iconImage.mj_x-_iconImage.mj_w-20, 15) andTitle:@"" andTextColor:RGBA(40, 40, 40, 1) andFont:DMFontBold(12)];
+        [self addSubview:_titleLab];
+        
+        _dateLab = [self getLabelWithFrame:CGRectMake(_titleLab.mj_x, _titleLab.mj_y+_titleLab.mj_h+8, _titleLab.mj_w, 12) andTitle:@"" andTextColor:RGBA(140, 140, 140, 1) andFont:DMFont(10)];
+        [self addSubview:_dateLab];
+        _dateLab.hidden = YES;
+        
+        _contentLab = [self getLabelWithFrame:CGRectMake(_titleLab.mj_x, _dateLab.mj_y+_dateLab.mj_h+8, _titleLab.mj_w, 14) andTitle:@"" andTextColor:RGBA(40, 40, 40, 1) andFont:DMFont(12)];
+        [self addSubview:_contentLab];
+        _contentLab.hidden = YES;
+        
+        _arrowImage = [[UIImageView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-14-arrowW, (cellH-arrowH)/2, arrowW, arrowH)];
+        _arrowImage.backgroundColor = [UIColor clearColor];
+        _arrowImage.image = [UIImage imageNamed:@"right2"];
+        [self addSubview:_arrowImage];
+        _arrowImage.hidden = YES;
+        
+        _numLab = [self getLabelWithFrame:CGRectMake(_arrowImage.mj_x-4-numLabWH, (cellH-numLabWH)/2, numLabWH, numLabWH) andTitle:@"" andTextColor:[UIColor whiteColor] andFont:DMFont(10)];
+        _numLab.backgroundColor = RGBA(255, 42, 80, 1);
+        _numLab.layer.cornerRadius = numLabWH/2;
+        _numLab.clipsToBounds = YES;
+        _numLab.textAlignment = NSTextAlignmentCenter;
+        [self addSubview:_numLab];
+        _numLab.hidden = YES;
+        
+        _lineImage = [[UIImageView alloc] initWithFrame:CGRectMake(14, 80.5, SCREEN_WIDTH-14, 0.5)];
+        _lineImage.backgroundColor = RGBA(200, 200, 200, 1);
+        [self addSubview:_lineImage];
+    }
+    return self;
+}
+
+
+- (void)setItemWithModel:(id)model andCount:(NSString *)count {
+    if ([model isKindOfClass:[NSString class]]) {
+        if ([model isEqualToString:@"系统消息"]) {
+            _iconImage.image = [UIImage imageNamed:@"blue"];
+            _titleLab.text = @"系统消息";
+        } else {
+            _iconImage.image = [UIImage imageNamed:@"red"];
+            _titleLab.text = @"赞";
+        }
+        
+        _titleLab.mj_y = (cellH-15)/2;
+        _dateLab.hidden = YES;
+        _contentLab.hidden = YES;
+        _arrowImage.hidden = NO;
+        _numLab.hidden = NO;
+        _numLab.text = count;
+        if ([count integerValue] > 99) {
+            _numLab.text = @"99+";
+        }
+        
+    } else {
+        Messagelist *messageModel = (Messagelist *)model;
+        [_iconImage sd_setImageWithURL:[NSURL URLWithString:messageModel.imgUrl] placeholderImage:[UIImage imageNamed:@"userdog"]];
+        _titleLab.text = messageModel.title;
+        _titleLab.frame = CGRectMake(_iconImage.mj_x+_iconImage.mj_w+9, _iconImage.mj_y, SCREEN_WIDTH-_iconImage.mj_x-_iconImage.mj_w-20, 15);
+        _dateLab.text = messageModel.publishDate;
+        _contentLab.text = messageModel.content;
+        _dateLab.hidden = NO;
+        _contentLab.hidden = NO;
+        _arrowImage.hidden = YES;
+        _numLab.hidden = YES;
+    }
+}
+
+
+- (UILabel *)getLabelWithFrame:(CGRect)frame andTitle:(NSString *)title andTextColor:(UIColor *)textColor andFont:(UIFont *)font {
+    UILabel *label = [[UILabel alloc] initWithFrame:frame];
+    label.backgroundColor = [UIColor clearColor];
+    label.text = title;
+    label.textColor = textColor;
+    label.font = font;
+    return label;
+}
+
+
+
+
+
+
+
+
+
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+//    [super setSelected:selected animated:animated];
+}
+
+@end

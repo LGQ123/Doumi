@@ -1,0 +1,35 @@
+//
+//  GZFSCell.m
+//  douMiApp
+//
+//  Created by ydz on 2016/12/5.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "GZFSCell.h"
+#import "FSAndZDMode.h"
+@implementation GZFSCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+- (void)setMode:(FSZBList *)mode {
+    _nikename.text = mode.uname;
+    [_icimage sd_setImageWithURL:[NSURL URLWithString:mode.imgUrl] placeholderImage:[UIImage imageNamed:@"userdog"]];
+    if (mode.isOnline == 1) {
+        _zhiboType.hidden = NO;
+    } else {
+    _zhiboType.hidden = YES;
+    }
+
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

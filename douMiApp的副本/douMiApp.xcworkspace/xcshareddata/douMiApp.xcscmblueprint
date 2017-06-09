@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "599fa8ec-22e6-11e4-8262-7be73e2366c6++7786",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "599fa8ec-22e6-11e4-8262-7be73e2366c6++7786" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "599fa8ec-22e6-11e4-8262-7be73e2366c6++7786" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "CF9C65A5-BC1A-4420-BAFA-25B2FF6A87C9",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "599fa8ec-22e6-11e4-8262-7be73e2366c6++7786" : "douMiApp\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "douMiApp",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "douMiApp.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "svn:\/\/192.168.2.240\/ops",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "599fa8ec-22e6-11e4-8262-7be73e2366c6++7786"
+    }
+  ]
+}

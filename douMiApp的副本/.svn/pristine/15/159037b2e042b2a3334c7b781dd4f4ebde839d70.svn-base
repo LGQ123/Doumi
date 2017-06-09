@@ -1,0 +1,44 @@
+//
+//  brushLiRecordCell.m
+//  douMiApp
+//
+//  Created by ydz on 2017/1/11.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "brushLiRecordCell.h"
+
+@implementation brushLiRecordCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+    self.mingXiBtn.layer.borderWidth = 1;
+    self.mingXiBtn.layer.borderColor = [RGBA(60, 60, 60, 1) CGColor];
+    self.XieYiBtn.layer.borderWidth = 1;
+    self.XieYiBtn.layer.borderColor = [RGBA(60, 60, 60, 1) CGColor];
+}
+- (IBAction)refundBtnClick:(UIButton *)sender {
+    if ([self.delegate respondsToSelector:@selector(refundDelegate)]) {
+        [self.delegate refundDelegate];
+    }
+}
+
+- (IBAction)mingXiBtnClick:(UIButton *)sender {
+    if ([self.delegate respondsToSelector:@selector(mingXiDelegate)]) {
+        [self.delegate mingXiDelegate];
+    }
+}
+- (IBAction)xieYiBtnClick:(UIButton *)sender {
+    if ([self.delegate respondsToSelector:@selector(xieYiDelegate)]) {
+        [self.delegate xieYiDelegate];
+    }
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

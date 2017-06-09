@@ -1,0 +1,255 @@
+//
+//  BoundClip2ViewController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/12/27.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "BoundClip2ViewController.h"
+#import "BackInforMode.h"
+#import "MytextCell.h"
+#import "GQPikerView.h"
+#import "PopupCodeview.h"
+@interface BoundClip2ViewController ()<UITableViewDelegate,UITableViewDataSource,GQPikerViewDelegate,popupCodeDelegate>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+@property (weak, nonatomic) IBOutlet UITextField *phoneText;
+@property (weak, nonatomic) IBOutlet UIButton *YNBtn;
+@property (strong, nonatomic) NSArray *_dataArr;
+
+@property (weak, nonatomic) IBOutlet UILabel *tishiLable;
+@property (copy, nonatomic) NSString *fakaYh;
+@property (copy, nonatomic) NSString *alias;
+@property (copy, nonatomic) NSString *orderId;
+@property (strong, nonatomic) GQPikerView *gqpikerView;
+@property (strong, nonatomic) PopupCodeview *popupCodeView;
+@end
+
+@implementation BoundClip2ViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    self.lable.text = @"绑定银行卡";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    [_myTableView registerClass:[MytextCell class] forCellReuseIdentifier:@"MytextCell"];
+    __dataArr = @[@"银行卡号",@"发卡银行",@"姓名",@"证件类型",@"证件号"];
+    _fakaYh = @"点击选择";
+    self.popupCodeView = [PopupCodeview new];
+    self.popupCodeView.delegate = self;
+}
+
+- (IBAction)YNBtnTouch:(UIButton *)sender {
+    sender.selected = !sender.selected;
+    
+    
+}
+
+
+- (IBAction)xieYiTouch:(UIButton *)sender {
+    
+    
+}
+- (IBAction)nextBtnTouch:(UIButton *)sender {
+    if ([BusinessLogic isValidateMobile:_phoneText.text]) {
+        if (_alias.length == 0) {
+            _tishiLable.hidden = NO;
+            _tishiLable.text = @"请选择发卡银行";
+        } else {
+            if (_YNBtn.selected) {
+                _tishiLable.hidden = NO;
+                _tishiLable.text = @"请同意协议";
+                
+            } else {
+            
+                _tishiLable.hidden = YES;
+                [self request_CodeApi];
+            }
+        }
+        
+        
+        
+    } else {
+        _tishiLable.hidden = NO;
+        _tishiLable.text = @"请正确填写手机号";
+    
+    }
+    
+    
+    
+}
+
+- (void)request_CodeApi {
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    NSDictionary *dic = @{@"iface":@"DMHY400012",@"userId":[BusinessLogic uuid],@"bankCode":_alias,@"bankNo":_mode.bankCard,@"phone":_phoneText.text,@"nextTxnSubType":@"01",@"txnSubType":@"05"};
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+         _tishiLable.hidden = YES;
+        _orderId = responseObj[@"orderId"];
+        NSMutableString *str = [[NSMutableString alloc] initWithString:_phoneText.text];
+        NSRange range = {0,7};
+        [str replaceCharactersInRange:range withString:@"****"];
+        self.popupCodeView.phone = str;
+        [self.popupCodeView startAnimationFunction];
+        if ([responseObj[@"rescode"] isEqualToString:@"0000"]) {
+            self.popupCodeView.errorLable.hidden = YES;
+        } else {
+            self.popupCodeView.errorLable.hidden = NO;
+            self.popupCodeView.errorLable.text = responseObj[@"resmsg"];
+        }
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        _tishiLable.hidden = NO;
+        _tishiLable.text = @"网络错误";
+        
+    }];
+    
+    
+}
+
+
+- (void)codeDelegate {
+    [MBProgressHUD showHUDAddedTo:self.popupCodeView animated:YES];
+    NSDictionary *dic = @{@"iface":@"DMHY400012",@"userId":[BusinessLogic uuid],@"bankCode":_alias,@"bankNo":_mode.bankCard,@"phone":_phoneText.text,@"nextTxnSubType":@"01",@"txnSubType":@"05"};
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+        [MBProgressHUD hideHUDForView:self.popupCodeView animated:YES];
+        _orderId = responseObj[@"orderId"];
+        if ([responseObj[@"rescode"] isEqualToString:@"0000"]) {
+           self.popupCodeView.errorLable.hidden = YES;
+        } else {
+            self.popupCodeView.errorLable.hidden = NO;
+            self.popupCodeView.errorLable.text = responseObj[@"resmsg"];
+        }
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:self.popupCodeView animated:YES];
+        self.popupCodeView.errorLable.hidden = NO;
+        self.popupCodeView.errorLable.text = @"网络错误";
+        
+    }];
+    
+}
+
+
+- (void)confirmDelegate {
+    if (self.popupCodeView.phoneText.text.length == 0) {
+        self.popupCodeView.errorLable.hidden = NO;
+        self.popupCodeView.errorLable.text = @"请输入验证码";
+    } else {
+        [self request_Api];
+    }
+}
+
+- (void)request_Api {
+    
+    [MBProgressHUD showHUDAddedTo:self.popupCodeView animated:YES];
+    NSDictionary *dic = @{@"iface":@"DMHY400021",@"userId":[BusinessLogic uuid],@"bankNo":_mode.bankCard,@"bankCode":_alias,@"phone":_phoneText.text,@"msgCode":self.popupCodeView.phoneText.text,@"bank":_fakaYh,@"orderId":_orderId};
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+        [MBProgressHUD hideHUDForView:self.popupCodeView animated:YES];
+        
+        if ([responseObj[@"rescode"] isEqualToString:@"0000"]) {
+            self.popupCodeView.errorLable.hidden = YES;
+            [self.popupCodeView CloseAnimationFunction];
+            [self.navigationController popToViewController:[self.navigationController.viewControllers objectAtIndex:2] animated:YES];
+        } else {
+        
+        self.popupCodeView.errorLable.hidden = NO;
+            self.popupCodeView.errorLable.text = responseObj[@"resmsg"];
+        }
+        
+        
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:self.popupCodeView animated:YES];
+        self.popupCodeView.errorLable.hidden = NO;
+        self.popupCodeView.errorLable.text = @"网络错误";
+    }];
+    
+    
+    
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+
+    return __dataArr.count;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    MytextCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MytextCell"];
+    cell.titleLable.text = __dataArr[indexPath.row];
+    
+    if (indexPath.row == 0) {
+        cell.contentLable.text = _mode.bankCard;
+        cell.contentLable.textColor = RGBA(139, 139, 139, 1);
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    if (indexPath.row == 1) {
+        cell.contentLable.text = _fakaYh;
+        cell.contentLable.textColor = RGBA(255, 42, 80, 1);
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    }
+    if (indexPath.row == 2) {
+        cell.contentLable.text = _mode.realName;
+        cell.contentLable.textColor = RGBA(139, 139, 139, 1);
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    if (indexPath.row == 3) {
+        cell.contentLable.text = _mode.documentType;
+        cell.contentLable.textColor = RGBA(139, 139, 139, 1);
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    if (indexPath.row == 4) {
+        cell.contentLable.text = _mode.idCard;
+        cell.contentLable.textColor = RGBA(139, 139, 139, 1);
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    
+    return cell;
+
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (indexPath.row == 1) {
+        self.gqpikerView = [GQPikerView new];
+        [self.gqpikerView setDataArr:_mode.bankInfo andTitleStr:@"发卡银行"];
+        self.gqpikerView.delegate = self;
+        [self.gqpikerView startAnimationFunction];
+    }
+}
+
+
+- (void)clickGQPikerStr:(NSString *)str andAlias:(NSString *)alias {
+    _fakaYh = str;
+    _alias = alias;
+    [_myTableView reloadData];
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

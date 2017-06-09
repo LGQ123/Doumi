@@ -1,0 +1,161 @@
+//
+//  AppDelegate.m
+//  douMiApp
+//
+//  Created by ydz on 16/10/27.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "AppDelegate.h"
+#import "CYLTabBarControllerConfig.h"
+#import "DM_SideslipController.h"
+#import "YRSideViewController.h"
+#import <UMSocialCore/UMSocialCore.h>
+#import "UMMobClick/MobClick.h"
+@interface AppDelegate ()
+
+@end
+
+@implementation AppDelegate
+
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    // Override point for customization after application launch.
+    [self showWindows];//设置主窗口
+    
+    //更新
+    [self VersionButton];
+    
+    
+    UMConfigInstance.appKey = @"583bb47f717c195337000c2e";
+    UMConfigInstance.channelId = @"App Store";
+    [MobClick startWithConfigure:UMConfigInstance];//配置以上参数后调用此方法初始化SDK！
+    
+    
+    //打开调试日志
+    [[UMSocialManager defaultManager] openLog:YES];
+    
+    //设置友盟appkey
+    [[UMSocialManager defaultManager] setUmSocialAppkey:@"583bb47f717c195337000c2e"];
+    
+    // 获取友盟social版本号
+    //NSLog(@"UMeng social version: %@", [UMSocialGlobal umSocialSDKVersion]);
+    
+    //设置微信的appKey和appSecret
+    [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_WechatSession appKey:@"wx18a37e86316e8e29" appSecret:@"50edb6a03beed4c597165c54ad145040" redirectURL:@"http://mobile.umeng.com/social"];
+    
+    
+    //设置分享到QQ互联的appKey和appSecret
+    [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_QQ appKey:@"1105810361"  appSecret:@"BO54ab77dK0UfhCW" redirectURL:@"http://mobile.umeng.com/social"];
+    
+    //设置新浪的appKey和appSecret
+    [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_Sina appKey:@"1880454051"  appSecret:@"300f0d6f506bc5a5f79d0dc78badeb6c" redirectURL:@"http://sns.whalecloud.com/sina2/callback"];
+    
+    
+    
+    return YES;
+}
+
+
+- (void)applicationWillResignActive:(UIApplication *)application {
+    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+    // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+}
+
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
+    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+}
+
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+}
+
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+}
+
+
+- (void)applicationWillTerminate:(UIApplication *)application {
+    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+// 支持所有iOS系统
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    BOOL result = [[UMSocialManager defaultManager] handleOpenURL:url];
+    if (!result) {
+        // 其他如支付等SDK的回调
+    }
+    return result;
+}
+
+
+#pragma rootWindows
+
+- (void)showWindows {
+    
+    CYLTabBarControllerConfig *tabBarControllerConfig = [[CYLTabBarControllerConfig alloc] init];
+    tabBarControllerConfig.tabBarController.selectedIndex = 1;
+    DM_SideslipController *dm_controller = [[DM_SideslipController alloc] initWithNibName:@"DM_SideslipController" bundle:nil];
+    _LeftSlideController=[[YRSideViewController alloc]initWithNibName:nil bundle:nil];
+    _LeftSlideController.rootViewController=tabBarControllerConfig.tabBarController;
+    _LeftSlideController.leftViewController=dm_controller;
+    _LeftSlideController.leftViewShowWidth=SCREEN_WIDTH-SCREEN_WIDTH/5;
+    _LeftSlideController.showBoundsShadow = NO;
+    
+    [_LeftSlideController setRootViewMoveBlock:^(UIView *rootView, CGRect orginFrame, CGFloat xoffset) {
+        //使用简单的平移动画
+        rootView.frame=CGRectMake(xoffset, orginFrame.origin.y, orginFrame.size.width, orginFrame.size.height);
+    }];
+    self.window.rootViewController = _LeftSlideController;
+
+}
+
+//版本更新
+
+- (void)VersionButton {
+    NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+    NSLog(@"%@",version);
+    
+    [NetworkRequest post1:serVerIP params:@{@"iface":@"DMHY100010",@"osType":@"1"} success:^(id responseObj) {
+        NSLog(@"%@",responseObj);
+        NSString *str = responseObj[@"newVerNo"];
+        NSLog(@"%@",str);
+        if (str.length == 0) {
+            
+        } else {
+        if ([responseObj[@"newVerNo"] isEqualToString:version]) {
+            
+        } else {
+            
+           [ self showAlertWithTitle:@"好好" message:@"有新版本更新，请前去下载" handler:^(UIAlertAction *action) {
+               NSURL *url = [NSURL URLWithString:@"itms-apps://itunes.apple.com"];
+               [[UIApplication sharedApplication] openURL:url];
+               
+            }];
+        }
+        }
+        
+    } failure:^(NSError *error) {
+        
+    }];
+    
+    
+}
+
+- (void)showAlertWithTitle:(NSString *)title message:(NSString *)message handler:(void (^) (UIAlertAction *action))handler;
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *action = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil];
+    UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"下载" style:UIAlertActionStyleDefault handler:handler];
+    [alert addAction:action];
+    [alert addAction:action1];
+    [self.window.rootViewController presentViewController:alert animated:YES completion:nil];
+}
+
+@end

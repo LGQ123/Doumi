@@ -1,0 +1,136 @@
+//
+//  DM_SignController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/4.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DM_SignController.h"
+#import "DM_SignCodeController.h"
+
+@interface DM_SignController ()
+@property (weak, nonatomic) IBOutlet MBTextFieldWithFontAdapter *phoneLable;
+@property (weak, nonatomic) IBOutlet MBTextFieldWithFontAdapter *pawLable;
+@property (weak, nonatomic) IBOutlet UILabel *tishi;
+@property (assign, nonatomic) BOOL isSee;
+@end
+
+@implementation DM_SignController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    self.lable.text = @"注册";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    _isSee = NO;
+    [_phoneLable addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
+    [_pawLable addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
+    
+    [MobClick endEvent:@"registerPaw"];
+}
+
+- (void)textFieldDidChange:(UITextField *)textField
+{
+    if (textField == self.phoneLable) {
+        if (textField.text.length > 11) {
+            textField.text = [textField.text substringToIndex:11];
+        }
+    }
+    
+    if (textField == self.pawLable) {
+        if (textField.text.length >12) {
+            textField.text = [textField.text substringToIndex:12];
+        }
+    }
+}
+
+- (IBAction)isSee:(UIButton *)sender {
+    _isSee = !_isSee;
+    sender.selected = _isSee;
+    _pawLable.secureTextEntry = !_isSee;
+}
+
+- (IBAction)next:(UIButton *)sender {
+   
+    
+    
+    
+    if ([BusinessLogic isValidateMobile:_phoneLable.text]) {
+        if ([BusinessLogic isValidatePassword:_pawLable.text]) {
+            _tishi.hidden = YES;
+            [self request_PhoneApi];
+        } else {
+            _tishi.hidden = NO;
+            _tishi.text = @"请设置8-12的密码";
+        }
+        
+    } else {
+        _tishi.hidden = NO;
+        _tishi.text = @"请输入正确的手机号";
+    }
+    
+}
+
+- (void)request_PhoneApi {//
+    
+    NSDictionary *dic = @{@"iface":@"DMHY100001",@"mobile":_phoneLable.text};
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        NSString *isRegFlag = responseObj[@"isRegFlag"];
+        if ([isRegFlag isEqualToString:@"0"]) {
+            _tishi.hidden = YES;
+            [self request_CodeApi];
+        } else {
+            _tishi.hidden = NO;
+            _tishi.text = @"该手机号已注册";
+        }
+    } failure:^(NSError *error) {
+        
+    }];
+    
+
+}
+
+- (void)request_CodeApi {
+    NSDictionary *dic = @{@"iface":@"DMHY100006",@"mobile":_phoneLable.text,@"type":@"1"};
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        if ([responseObj[@"rescode"] isEqualToString:@"0000"] || [responseObj[@"rescode"] isEqualToString:@"0004"]) {
+            DM_SignCodeController *dm_scc = [[DM_SignCodeController alloc] initWithNibName:@"DM_SignCodeController" bundle:nil];
+            dm_scc.paw = _pawLable.text;
+            dm_scc.phone = _phoneLable.text;
+            dm_scc.type = @"push";
+            [self.navigationController pushViewController:dm_scc animated:YES];
+        }
+    } failure:^(NSError *error) {
+        
+    }];
+
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

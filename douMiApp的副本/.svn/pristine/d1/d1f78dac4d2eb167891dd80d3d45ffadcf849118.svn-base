@@ -1,0 +1,30 @@
+//
+//  DM_TopCell.h
+//  douMiApp
+//
+//  Created by ydz on 2016/11/7.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "SDCycleScrollView.h"
+@class Bannerlist;
+@protocol homeTopDelegate <NSObject>
+
+@optional
+
+- (void)bannerIndex:(NSInteger)index;
+- (void)collecTouchIndes:(NSInteger)index;
+
+@end
+
+@interface DM_TopCell : UITableViewCell<SDCycleScrollViewDelegate,UICollectionViewDataSource,UICollectionViewDelegate>
+
+
+@property (strong, nonatomic) NSArray<Bannerlist *>*bannerArr;
+@property (strong, nonatomic) NSArray *imageArr;
+@property (weak, nonatomic) id<homeTopDelegate>delegate;
+
+@property (strong, nonatomic)SDCycleScrollView *cycleScrollView;
+
+@end

@@ -1,0 +1,96 @@
+//
+//  RefundMXController.m
+//  douMiApp
+//
+//  Created by ydz on 2017/1/13.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "RefundMXController.h"
+#import "MXTopCell.h"
+#import "MXBelowCell.h"
+@interface RefundMXController ()<UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+
+@end
+
+@implementation RefundMXController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    
+    
+}
+
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    self.lable.text = @"还款明细";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    // Do any additional setup after loading the view from its nib.
+    
+    [_myTableView registerNib:[UINib nibWithNibName:@"MXTopCell" bundle:nil] forCellReuseIdentifier:@"MXTopCell"];
+    [_myTableView registerNib:[UINib nibWithNibName:@"MXBelowCell" bundle:nil] forCellReuseIdentifier:@"MXBelowCell"];
+}
+
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 1;
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 5;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 10;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        return 220;
+    } else {
+        return 75;
+    }
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        
+        MXTopCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MXTopCell"];
+        return cell;
+    } else {
+        MXBelowCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MXBelowCell"];
+        return cell;
+        
+    }
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

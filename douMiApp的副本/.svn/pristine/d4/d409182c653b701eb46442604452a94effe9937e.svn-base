@@ -1,0 +1,42 @@
+//
+//  MessageMode.h
+//  douMiApp
+//
+//  Created by ydz on 2016/12/12.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@class Messagelist;
+@interface MessageModeA : NSObject
+
+@property (nonatomic, copy) NSString *totalNum;
+
+@property (nonatomic, copy) NSString *resmsg;
+
+@property (nonatomic, copy) NSString *userId;
+
+@property (nonatomic, copy) NSString *rescode;
+
+@property (nonatomic, copy) NSString *imgUrl;
+
+@property (nonatomic, strong) NSArray<Messagelist *> *messageList;
+
+@end
+@interface Messagelist : NSObject
+
+@property (nonatomic, assign) NSInteger Id;
+
+@property (nonatomic, copy) NSString *content;
+
+@property (nonatomic, copy) NSString *title;
+
+@property (nonatomic, copy) NSString *pic;
+
+@property (nonatomic, copy) NSString *publishDate;
+
+@property (nonatomic, assign) NSInteger isRead;
+
+@end
+

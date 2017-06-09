@@ -1,0 +1,117 @@
+//
+//  RefundViewController.m
+//  douMiApp
+//
+//  Created by ydz on 2017/1/11.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "RefundViewController.h"
+#import "RefundCell.h"
+
+@interface RefundViewController ()<UITableViewDataSource,UITableViewDelegate>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+@property (weak, nonatomic) IBOutlet UIButton *allXuanBtn;
+
+@property (assign, nonatomic) BOOL isBianJi;
+
+@end
+
+@implementation RefundViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    }
+
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    _isBianJi = NO;
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    [self addItem:nitem_right btnTitleArr:@[@"批量",@"1",@"ask"]];
+    self.playBtn.hidden = NO;
+    self.lable.text = @"逾期还款";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    [_myTableView registerNib:[UINib nibWithNibName:@"RefundCell" bundle:nil] forCellReuseIdentifier:@"RefundCell"];
+
+}
+- (IBAction)allXuanBtnClick:(UIButton *)sender {
+    
+    _allXuanBtn.selected = !_allXuanBtn.selected;
+    
+    [_myTableView reloadData];
+    
+}
+- (void)showRightView:(UIButton *)btn {
+    
+    if (btn.tag == 2) {
+        //问题
+    }
+    
+    if (btn.tag == 0) {
+        NSLog(@"点击了编辑");
+        _isBianJi = !_isBianJi;
+        [_myTableView reloadData];
+    }
+    
+}
+- (IBAction)huanKuanBtnClick:(UIButton *)sender {
+    
+    
+}
+
+#pragma tableViewDelegate
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 1;
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 5;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 108;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 10;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 0.01;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    RefundCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RefundCell"];
+    if (_isBianJi) {
+        cell.myScrollView.contentOffset = CGPointMake(80, 0);
+    } else {
+        cell.myScrollView.contentOffset = CGPointMake(0, 0);
+    }
+    
+    return cell;
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

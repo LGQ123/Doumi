@@ -1,0 +1,25 @@
+//
+//  PopupPawView.h
+//  douMiApp
+//
+//  Created by ydz on 2016/12/30.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@protocol popupPawDelegate <NSObject>
+@optional
+- (void)popupPaw:(NSString *)paw;
+- (void)foundPawDelegate;
+@end
+
+@interface PopupPawView : UIView
+
+@property (copy, nonatomic)NSString *title;
+@property (strong, nonatomic) UILabel *errorLable;
+
+@property (weak, nonatomic) id<popupPawDelegate>delegate;
+- (void)startAnimationFunction;
+- (void)CloseAnimationFunction;
+@end

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MyQuizViewController">
+            <connections>
+                <outlet property="ResidueLable" destination="9MK-q1-U5K" id="lsw-3a-hMv"/>
+                <outlet property="myTableView" destination="h0z-5V-iZH" id="q83-Rb-EqL"/>
+                <outlet property="myTextView" destination="TDg-Tk-Ilo" id="5Z6-My-wVm"/>
+                <outlet property="placeholderLable" destination="um0-Vd-FvS" id="Ps0-3Y-Ewm"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Wy7-7x-Ax4">
+                    <rect key="frame" x="0.0" y="74" width="375" height="170"/>
+                    <subviews>
+                        <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="TDg-Tk-Ilo">
+                            <rect key="frame" x="14" y="20" width="347" height="130"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <color key="textColor" red="0.54896527530000006" green="0.54905885460000003" blue="0.54894548649999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                            <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            <connections>
+                                <outlet property="delegate" destination="-1" id="JZj-v7-zil"/>
+                            </connections>
+                        </textView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="在此编辑您遇到的问题..(最多200字)" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="um0-Vd-FvS">
+                            <rect key="frame" x="15" y="25" width="211" height="13"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                            <color key="textColor" red="0.54896527528762817" green="0.54905885457992554" blue="0.54894548654556274" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="(还剩200字)" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9MK-q1-U5K">
+                            <rect key="frame" x="289" y="153" width="72" height="13"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="72" id="i2n-5y-BDA"/>
+                                <constraint firstAttribute="height" constant="13" id="tfY-pM-8Wi"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                            <color key="textColor" red="0.54896527530000006" green="0.54905885460000003" blue="0.54894548649999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="9MK-q1-U5K" secondAttribute="trailing" constant="14" id="0mH-fF-x1o"/>
+                        <constraint firstItem="9MK-q1-U5K" firstAttribute="top" secondItem="TDg-Tk-Ilo" secondAttribute="bottom" constant="3" id="6xZ-br-IEU"/>
+                        <constraint firstAttribute="bottom" secondItem="TDg-Tk-Ilo" secondAttribute="bottom" constant="20" id="9IX-hi-jNq"/>
+                        <constraint firstAttribute="height" constant="170" id="TaG-jc-kLm"/>
+                        <constraint firstItem="TDg-Tk-Ilo" firstAttribute="top" secondItem="Wy7-7x-Ax4" secondAttribute="top" constant="20" id="cdw-L4-uCP"/>
+                        <constraint firstAttribute="trailing" secondItem="TDg-Tk-Ilo" secondAttribute="trailing" constant="14" id="prg-tC-XV4"/>
+                        <constraint firstItem="TDg-Tk-Ilo" firstAttribute="leading" secondItem="Wy7-7x-Ax4" secondAttribute="leading" constant="14" id="riW-st-jAU"/>
+                    </constraints>
+                </view>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cZP-m3-xzv">
+                    <rect key="frame" x="14" y="264" width="347" height="40"/>
+                    <color key="backgroundColor" red="0.20781949162483215" green="0.20786017179489136" blue="0.20781084895133972" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="40" id="Syi-iE-e17"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <state key="normal" title="提问">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="quizClick:" destination="-1" eventType="touchUpInside" id="uS8-kg-g2W"/>
+                    </connections>
+                </button>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="h0z-5V-iZH">
+                    <rect key="frame" x="0.0" y="324" width="375" height="343"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="MuW-gJ-mgR"/>
+                        <outlet property="delegate" destination="-1" id="Swx-UC-AQg"/>
+                    </connections>
+                </tableView>
+            </subviews>
+            <color key="backgroundColor" red="0.96853548288345337" green="0.96869391202926636" blue="0.9685017466545105" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="Wy7-7x-Ax4" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="74" id="6fn-W2-O6Z"/>
+                <constraint firstAttribute="bottom" secondItem="h0z-5V-iZH" secondAttribute="bottom" id="Dma-xS-bWL"/>
+                <constraint firstAttribute="trailing" secondItem="Wy7-7x-Ax4" secondAttribute="trailing" id="Oy7-uf-1iT"/>
+                <constraint firstItem="h0z-5V-iZH" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="SHV-Qf-eJh"/>
+                <constraint firstItem="cZP-m3-xzv" firstAttribute="top" secondItem="Wy7-7x-Ax4" secondAttribute="bottom" constant="20" id="YSm-EF-B9h"/>
+                <constraint firstAttribute="trailing" secondItem="h0z-5V-iZH" secondAttribute="trailing" id="cWH-0E-nZh"/>
+                <constraint firstItem="Wy7-7x-Ax4" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="ch4-kD-cIZ"/>
+                <constraint firstItem="h0z-5V-iZH" firstAttribute="top" secondItem="cZP-m3-xzv" secondAttribute="bottom" constant="20" id="ehy-iq-5xw"/>
+                <constraint firstAttribute="trailing" secondItem="cZP-m3-xzv" secondAttribute="trailing" constant="14" id="lQp-eP-x9w"/>
+                <constraint firstItem="cZP-m3-xzv" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="14" id="t2a-y8-nTj"/>
+            </constraints>
+            <point key="canvasLocation" x="33.5" y="53.5"/>
+        </view>
+    </objects>
+</document>

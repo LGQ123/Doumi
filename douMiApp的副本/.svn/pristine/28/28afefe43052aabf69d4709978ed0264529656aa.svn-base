@@ -1,0 +1,594 @@
+//
+//  DM_HomeController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/3.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DM_HomeController.h"
+#import "AppDelegate.h"
+#import "YRSideViewController.h"
+#import "MessageController.h"
+#import "GloryListController.h"
+#import "ActivityController.h"
+#import "SuperBoController.h"
+#import "DM_DisplayController.h"
+#import "HTListViewController.h"
+#import "SearchResultController.h"
+#import "PYSearch.h"
+#import "DM_TopCell.h"
+#import "DM_HomeCell.h"
+#import "DM_HotCell.h"
+#import "DM_BelowCell.h"
+#import "HomeMode.h"
+#import "PersonageViewController.h"
+#import "MessageCenterController.h"
+#import "HTDetailsViewController.h"
+#import "RWebViewConreoller.h"
+#import "UILabel+ChangeLineSpaceAndWordSpace.h"
+#import "DM_LoginController.h"
+#import "DMMeDouJiaViewController.h"
+#import "DMMiFenQiViewController.h"
+#import "RecreationController.h"
+#import "DMUserIdentifyViewController.h"
+#import "DMMeXinModel.h"
+@interface DM_HomeController ()<UITableViewDelegate,UITableViewDataSource,messageDelegate,PYSearchViewControllerDelegate,homeTopDelegate,homeHotDelegate>
+
+
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+
+
+@property (strong, nonatomic) HomeMode *mode;
+
+@property (copy, nonatomic) NSString *showYBState;
+
+@end
+
+@implementation DM_HomeController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    
+    
+    if ([BusinessLogic uuid].length == 0) {
+        
+    } else {
+        NSDictionary *dic = @{@"iface":@"DMHY100012",@"mobile":[BusinessLogic getPhoneNo]};
+        [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+            _showYBState = responseObj[@"showYBState"];
+            [BusinessLogic setPower:_showYBState];
+            
+        } failure:^(NSError *error) {
+            
+        }];
+        
+    }
+    [self request_Api];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    NSLog(@"111");
+    self.view.backgroundColor = RGBA(247, 247, 247, 1);
+    _myTableView.backgroundColor = RGBA(247, 247, 247, 1);
+    [self addItem:nitem_left btnTitleArr:@[@"pilot"]];
+    [self addItem:nitem_right btnTitleArr:@[@"new",@"1",@"sousuo"]];
+    self.playBtn.hidden = NO;
+    [_myTableView registerClass:[DM_TopCell class] forCellReuseIdentifier:@"dm_top"];
+    [_myTableView registerNib:[UINib nibWithNibName:@"DM_HomeCell" bundle:nil]forCellReuseIdentifier:@"dm_home"];
+    [_myTableView registerNib:[UINib nibWithNibName:@"DM_HotCell" bundle:nil] forCellReuseIdentifier:@"dm_hotcell"];
+    [_myTableView registerNib:[UINib nibWithNibName:@"DM_BelowCell" bundle:nil] forCellReuseIdentifier:@"dm_belowcell"];
+    [_myTableView setContentInset:UIEdgeInsetsMake(64, 0, 60, 0)];
+    __weak __typeof(self) weakSelf = self;
+    _myTableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        [weakSelf request_Api];
+    }];
+//    [self request_Api];
+}
+
+
+- (void)request_Api {
+//    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    __weak UITableView *tableView = self.myTableView;
+    
+    NSDictionary *dic = [[NSDictionary alloc] init];
+    
+    if (![BusinessLogic uuid]) {
+        dic = @{@"iface":@"DMHY200001"};
+    } else {
+        dic = @{@"iface":@"DMHY200001",@"userId":[BusinessLogic uuid]};
+    }
+    
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+//        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        _mode = [HomeMode mj_objectWithKeyValues:responseObj];
+        if ([_mode.msgStatus isEqualToString:@"0"]) {
+            
+        } else {
+            self.redbtn.selected = YES;
+        }
+        [tableView reloadData];
+        [tableView.mj_header endRefreshing];
+        
+    } failure:^(NSError *error) {
+        [tableView.mj_header endRefreshing];
+//        [MBProgressHUD hideHUDForView:self.view animated:YES];
+    }];
+
+}
+
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 1;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 4;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 0.01;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    if (section == 3) {
+        return 0.1;
+    } else {
+        return 10;
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 0) {
+        return SCREEN_WIDTH*8/15+10+SCREEN_WIDTH*4/15;
+    } else if (indexPath.section == 1) {
+        return SCREEN_WIDTH*4/15+110;
+    } else if (indexPath.section == 2) {
+        return 165;
+    } else {
+        return 140+160+10+(SCREEN_WIDTH/2-5)*5/7;
+    }
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+
+    
+    
+    if (indexPath.section == 0) {
+        DM_TopCell *cell = [tableView dequeueReusableCellWithIdentifier:@"dm_top"];
+        cell.delegate = self;
+        if ([BusinessLogic power].length ==0) {
+            cell.imageArr = @[@"视频专区",@"近期活动",@"荣耀榜单",@"签到"];
+        } else {
+            if ([[BusinessLogic power] isEqualToString:@"Y"]) {
+                cell.imageArr = @[@"娱乐充值",@"近期活动",@"荣耀榜单",@"签到"];
+            } else {
+                cell.imageArr = @[@"视频专区",@"近期活动",@"荣耀榜单",@"签到"];
+            }
+            
+        }
+        [cell.myCollectionView reloadData];
+        cell.bannerArr = _mode.bannerList;
+        return cell;
+    } else if (indexPath.section == 1) {
+        DM_HomeCell *cell = [tableView dequeueReusableCellWithIdentifier:@"dm_home"];
+        [cell.adImage sd_setImageWithURL:[NSURL URLWithString:_mode.entPlayBanner] placeholderImage:nil];
+        cell.dataArr = _mode.listAnchorOnindex;
+        [cell.myCollec reloadData];
+        cell.delegate = self;
+        return cell;
+    } else if (indexPath.section == 2) {
+        DM_HotCell *cell = [tableView dequeueReusableCellWithIdentifier:@"dm_hotcell"];
+        cell.HTTitle.text = _mode.talkTitle;
+        cell.HTNumber.text = _mode.hotNum;
+//        NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:_mode.talkContent];
+//        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+//        [paragraphStyle setLineSpacing:5];
+//        [attributedString addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, [_mode.talkContent length])];
+//        cell.HTContent.attributedText = attributedString;
+        cell.HTContent.text = _mode.talkContent;
+        NSLog(@"%@",_mode.talkContent);
+        if (_mode.talkContent.length == 0) {
+            
+        } else {
+        [UILabel changeLineSpaceForLabel:cell.HTContent WithSpace:5.0];
+        }
+        
+        if (_mode.talkHeadUrlList.count > 0) {
+                [cell.im1 sd_setImageWithURL:[NSURL URLWithString:_mode.talkHeadUrlList[0].headUrl] placeholderImage:[UIImage imageNamed:@"dog"]];
+            NSLog(@"%@",_mode.talkHeadUrlList[0]);
+        }
+        if (_mode.talkHeadUrlList.count > 1) {
+            [cell.im2 sd_setImageWithURL:[NSURL URLWithString:_mode.talkHeadUrlList[1].headUrl] placeholderImage:[UIImage imageNamed:@"dog"]];
+        }
+        if (_mode.talkHeadUrlList.count > 2) {
+            [cell.im3 sd_setImageWithURL:[NSURL URLWithString:_mode.talkHeadUrlList[2].headUrl] placeholderImage:[UIImage imageNamed:@"dog"]];
+        }
+        
+        [cell.HTBtn addTarget:self action:@selector(htBtnTouch:) forControlEvents:UIControlEventTouchUpInside];
+        UITapGestureRecognizer *tapHT = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapHT:)];
+        [cell.touchView addGestureRecognizer:tapHT];
+        
+        return cell;
+        
+    } else {
+        DM_BelowCell *cell = [tableView dequeueReusableCellWithIdentifier:@"dm_belowcell"];
+        cell.dateLabel.text = _mode.publishDate;
+        cell.typeLable.text = _mode.hotNewsType;
+        [cell.messageImg sd_setImageWithURL:[NSURL URLWithString:_mode.pic1] placeholderImage:nil];
+        [cell.messageImg2 sd_setImageWithURL:[NSURL URLWithString:_mode.pic2] placeholderImage:nil];
+        [cell.messageImg3 sd_setImageWithURL:[NSURL URLWithString:_mode.pic3] placeholderImage:nil];
+        cell.mseTitle.text = _mode.hotNewsTitle;
+        cell.mseText.text = _mode.hotNewsContent;
+        if (_mode.talkContent.length == 0) {
+            
+        } else {
+            [UILabel changeLineSpaceForLabel:cell.mseText WithSpace:5.0];
+        }
+        cell.delegate = self;
+        return cell;
+    }
+
+}
+
+#pragma selfdelegate
+
+//点击话题详情
+
+- (void)tapHT:(UITapGestureRecognizer *)tap {
+    
+   
+    
+    HTDetailsViewController *htDetailsVC = [[HTDetailsViewController alloc] initWithNibName:@"HTDetailsViewController" bundle:nil];
+    htDetailsVC.talkId = _mode.talkId;
+    [self.navigationController pushViewController:htDetailsVC animated:YES];
+    
+
+}
+
+
+//点击资讯
+- (void)check:(UITableViewCell *)cell {
+    MessageController *messageC = [[MessageController alloc] initWithNibName:@"MessageController" bundle:nil];
+    [self.navigationController pushViewController:messageC animated:YES];
+}
+
+//资讯详情
+- (void)details:(UITableViewCell *)cell {
+    RWebViewConreoller *webvC = [[RWebViewConreoller alloc] initWithNibName:@"RWebViewConreoller" bundle:nil];
+    webvC.titleStr = @"资讯详情";
+    webvC.urlStr = [NSString stringWithFormat:NewIP,_mode.hotNewsId];
+    NSLog(@"%@", webvC.urlStr);
+    [self.navigationController pushViewController:webvC animated:YES];
+    
+    
+}
+
+//点击话题
+
+- (void)htBtnTouch:(UIButton *)sender {
+    HTListViewController *htVC = [[HTListViewController alloc] initWithNibName:@"HTListViewController" bundle:nil];
+    
+    [self.navigationController pushViewController:htVC animated:YES];
+    
+}
+
+
+- (void)showLeftView:(UIButton *)btn {
+    AppDelegate *delegate=(AppDelegate*)[[UIApplication sharedApplication]delegate];
+    YRSideViewController *sideViewController=[delegate LeftSlideController];
+    [sideViewController showLeftViewController:true];
+
+}
+
+- (void)showRightView:(UIButton *)btn {
+    
+    if (btn.tag == 2) {
+        // 1.创建热门搜索
+        if ([BusinessLogic uuid].length == 0) {
+            DM_LoginController *dmLVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+            [self.navigationController pushViewController:dmLVC animated:YES];
+            
+        } else {
+            [self requestHot_Api];
+        }
+        
+    }
+    
+    if (btn.tag == 0) {
+        NSLog(@"点击了消息");
+        btn.selected = NO;
+        
+        if ([BusinessLogic uuid].length == 0) {
+            DM_LoginController *dmLVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+            [self.navigationController pushViewController:dmLVC animated:YES];
+            
+        } else {
+        
+        MessageCenterController *messageCenter = [[MessageCenterController alloc] initWithNibName:@"MessageCenterController" bundle:nil];
+            [self.navigationController pushViewController:messageCenter animated:YES];
+        }
+    }
+    
+}
+
+//搜索热门
+- (void)requestHot_Api {
+    NSDictionary *dic = @{@"iface":@"DMHY200020"};
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+        NSArray *hotSeaches = responseObj[@"stringList"];
+        NSLog(@"%@",hotSeaches);
+        PYSearchViewController *searchViewController = [PYSearchViewController searchViewControllerWithHotSearches:hotSeaches searchBarPlaceholder:@"搜索"];
+        // 3. 设置风格
+        searchViewController.hotSearchStyle = PYHotSearchStyleBorderTag; // 热门搜索风格根据选择
+        searchViewController.searchHistoryStyle = PYHotSearchStyleDefault; // 搜索历史风格为default
+        // 4. 设置代理
+        searchViewController.delegate = self;
+        searchViewController.searchSuggestionHidden = YES;
+        searchViewController.searchResultShowMode = PYSearchResultShowModeEmbed;
+        [self.navigationController pushViewController:searchViewController animated:YES];
+    } failure:^(NSError *error) {
+        
+    }];
+    
+}
+
+//点击banner
+- (void)bannerIndex:(NSInteger)index {
+    NSLog(@"%li",(long)index);
+    
+    if ([_mode.bannerList[index].jumpType isEqualToString:@"0"]) {
+        
+    } else {
+        if ([_mode.bannerList[index].jumpType isEqualToString:@"1"]) {
+        RWebViewConreoller *webVC = [[RWebViewConreoller alloc] initWithNibName:@"RWebViewConreoller" bundle:nil];
+        webVC.titleStr = @"详情";
+        webVC.urlStr = _mode.bannerList[index].jumpUrl;
+        [self.navigationController pushViewController:webVC animated:YES];
+    } else if([_mode.bannerList[index].jumpType isEqualToString:@"2"]) {
+        
+        PersonageViewController *personageVC = [[PersonageViewController alloc] initWithNibName:@"PersonageViewController" bundle:nil];
+        personageVC.UUID = _mode.bannerList[index].jumpValue;
+        NSLog(@"%@",_mode.bannerList[index].jumpValue);
+        [self.navigationController pushViewController:personageVC animated:YES];
+    
+    } else if ([_mode.bannerList[index].jumpType isEqualToString:@"3"]) {
+        HTDetailsViewController *htVC = [[HTDetailsViewController alloc] initWithNibName:@"HTDetailsViewController" bundle:nil];
+        htVC.talkId = _mode.bannerList[index].jumpValue;
+        [self.navigationController pushViewController:htVC animated:YES];
+    
+    } else {
+        DM_DisplayController *dm_sideVC = [[DM_DisplayController alloc] init];
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"all"]) {
+            dm_sideVC.page = 0;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"hot"]) {
+            dm_sideVC.page = 1;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"0"]) {
+            dm_sideVC.page = 3;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"1"]) {
+            dm_sideVC.page = 4;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"2"]) {
+            dm_sideVC.page = 5;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"3"]) {
+            dm_sideVC.page = 6;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"4"]) {
+           dm_sideVC.page = 7;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"new"]) {
+            dm_sideVC.page = 2;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"yy"]) {
+            dm_sideVC.page = 8;
+        }
+        if ([_mode.bannerList[index].jumpValue isEqualToString:@"panda"]) {
+           dm_sideVC.page = 9;
+        }
+        
+        [self.navigationController pushViewController:dm_sideVC animated:YES];
+    
+    }
+    
+    }
+    
+}
+//点击分类
+- (void)collecTouchIndes:(NSInteger)index {
+  NSLog(@"%li",(long)index);
+    if (index == 2) {
+        GloryListController *gloryVC = [[GloryListController alloc] initWithNibName:@"GloryListController" bundle:nil];
+        [self.navigationController pushViewController:gloryVC animated:YES];
+    }
+    if (index == 1) {
+        ActivityController *activityVC = [[ActivityController alloc] initWithNibName:@"ActivityController" bundle:nil];
+        [self.navigationController pushViewController:activityVC animated:YES];
+    }
+    if (index == 3) {
+        if ([BusinessLogic uuid].length == 0) {
+            DM_LoginController *dmLVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+            [self.navigationController pushViewController:dmLVC animated:YES];
+            
+        } else {
+            RWebViewConreoller *rweb = [[RWebViewConreoller alloc] initWithNibName:@"RWebViewConreoller" bundle:nil];
+            rweb.titleStr = @"签到";
+            rweb.urlStr = [NSString stringWithFormat:signi,[BusinessLogic uuid]];
+            [self.navigationController pushViewController:rweb animated:YES];
+        }
+    }
+    
+    if (index == 0) {
+        
+        if ([BusinessLogic uuid].length == 0) {
+            DM_LoginController *dmLVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+            [self.navigationController pushViewController:dmLVC animated:YES];
+            
+        } else {
+            
+            if ([[BusinessLogic power] isEqualToString:@"Y"]) {
+                RecreationController *rVC = [[RecreationController alloc] initWithNibName:@"RecreationController" bundle:nil];
+                [self.navigationController pushViewController:rVC animated:YES];
+            } else {
+                SuperBoController *superBoVC = [[SuperBoController alloc] initWithNibName:@"SuperBoController" bundle:nil];
+                [self.navigationController pushViewController:superBoVC animated:YES];
+            }
+            
+           
+        }
+
+    }
+
+    
+}
+
+//点击ad
+- (void)adimageDelegate {
+   NSLog(@"%s",__func__);
+    SuperBoController *superBoVC = [[SuperBoController alloc] initWithNibName:@"SuperBoController" bundle:nil];
+    [self.navigationController pushViewController:superBoVC animated:YES];
+}
+//点击热门按钮
+- (void)hotTouchDelegate {
+    NSLog(@"%s",__func__);
+    DM_DisplayController *displayVC = [[DM_DisplayController alloc] init];
+    displayVC.page = 1;
+    [self.navigationController pushViewController:displayVC animated:YES];
+}
+//点击 热门主播
+- (void)hotCollecIndex:(NSInteger)index {
+    NSLog(@"%s",__func__);
+    
+    if (index == 0) {
+        DM_DisplayController *displayVC = [[DM_DisplayController alloc] init];
+        displayVC.page = 1;
+        [self.navigationController pushViewController:displayVC animated:YES];
+    } else {
+    
+    PersonageViewController *personageVC = [[PersonageViewController alloc] initWithNibName:@"PersonageViewController" bundle:nil];
+    personageVC.UUID = [NSString stringWithFormat:@"%ld",(long)_mode.listAnchorOnindex[index-1].anchorId];
+    
+        [self.navigationController pushViewController:personageVC animated:YES];
+    }
+}
+
+/** 点击(开始)搜索时调用 */
+- (void)searchViewController:(PYSearchViewController *)searchViewController didSearchWithsearchBar:(UISearchBar *)searchBar searchText:(NSString *)searchText {
+    NSLog(@"%@",searchText);
+    
+}
+
+
+// 点击蜜豆荚按钮
+- (void)meDoujiaButtonClick {
+    
+    if ([BusinessLogic power].length == 0) {
+        
+    } else {
+        if ([[BusinessLogic power] isEqualToString:@"Y"]) {
+            
+            if ([BusinessLogic uuid].length == 0) {
+                
+                DM_LoginController *dmLVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+                [self.navigationController pushViewController:dmLVC animated:YES];
+                
+            } else {
+                
+                DMMeDouJiaViewController *controller = [[DMMeDouJiaViewController alloc] init];
+                [self.navigationController pushViewController:controller animated:YES];
+            }
+            
+            
+        } else {
+        
+        }
+        
+    
+    }
+    
+    
+    
+}
+
+
+// 点击蜜分期按钮
+- (void)fenQiButtonClick {
+    
+    if ([BusinessLogic power].length == 0) {
+        
+    } else {
+        if ([[BusinessLogic power] isEqualToString:@"Y"]) {
+            if ([BusinessLogic uuid].length == 0) {
+                
+                DM_LoginController *dmLVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+                [self.navigationController pushViewController:dmLVC animated:YES];
+                
+            } else {
+                
+                __weak __typeof(self) weakSelf = self;
+                
+                NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+                [dic dm_setObject:@"DMHY500010" forKey:@"iface"];
+                [dic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+                [NetworkRequest post:serVerIP params:dic success:^(id responseObj) { // 已授信直接跳到蜜分期页面，未授信跳到用户认证页面
+                    
+                    DMMeXinModel *model = [DMMeXinModel mj_objectWithKeyValues:responseObj];
+                    NSLog(@"%@",model.creditInfo.creditStatus);
+                    if ([model.rescode isEqualToString:@"0000"]) {
+                        
+                        if ( [model.creditInfo.creditStatus isEqualToString:@"2"]) { // 已认证
+                            
+                            DMMiFenQiViewController *controller = [[DMMiFenQiViewController alloc] initWithNibName:@"DMMiFenQiViewController" bundle:nil];
+                            [weakSelf.navigationController pushViewController:controller animated:YES];
+                            
+                        } else {
+                            if ([model.creditInfo.creditStatus isEqualToString:@"3"]) {
+                                [self showAlertWithTitle:@"提示" message:@"请提升授信评分" handler:nil];
+                                
+                                
+                            } else {
+                                DMUserIdentifyViewController *controller = [[DMUserIdentifyViewController alloc] init];
+                                [weakSelf.navigationController pushViewController:controller animated:YES];
+                            }
+                        }
+                        
+                    }
+                    
+                } failure:^(NSError *error) {
+                    
+                }];
+                
+                
+                
+            }
+        } else {
+        
+        
+        }
+    }
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

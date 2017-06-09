@@ -1,0 +1,110 @@
+//
+//  YTicketViewController.m
+//  douMiApp
+//
+//  Created by ydz on 2017/1/16.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "YTicketViewController.h"
+#import "YTicketCell.h"
+#import "YTicketMode.h"
+@interface YTicketViewController ()<UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+
+@end
+
+@implementation YTicketViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"优惠券选取"];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"优惠券选取"];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    [_myTableView registerNib:[UINib nibWithNibName:@"YTicketCell" bundle:nil] forCellReuseIdentifier:@"YTicketCell"];
+}
+
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 1;
+    
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return _mode.voucherExchangeList.count+1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 10;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 0.01;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 40;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    YTicketCell *cell = [tableView dequeueReusableCellWithIdentifier:@"YTicketCell"];
+    if (indexPath.section == 0) {
+        cell.bgView.backgroundColor = RGBA(60, 60, 60, 1);
+        cell.noTickeLable.hidden = NO;
+        
+        cell.timeLable.hidden = YES;
+        cell.titleLable.hidden = YES;
+    } else {
+        cell.bgView.backgroundColor = [UIColor whiteColor];
+        cell.noTickeLable.hidden = YES;
+        
+        cell.timeLable.hidden = NO;
+        cell.titleLable.hidden = NO;
+        cell.timeLable.text = [NSString stringWithFormat:@"%@到期",_mode.voucherExchangeList[indexPath.section-1].endTime];
+        cell.titleLable.text = [NSString stringWithFormat:@"%@元%@",_mode.voucherExchangeList[indexPath.section-1].amount,_mode.voucherExchangeList[indexPath.section-1].name];
+    }
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        if ([self.delegate respondsToSelector:@selector(returnVoucher:)]) {
+            [self.delegate returnVoucher:[[VoucherExchangeList alloc]init]];
+        }
+    } else {
+        if ([self.delegate respondsToSelector:@selector(returnVoucher:)]) {
+            [self.delegate returnVoucher:_mode.voucherExchangeList[indexPath.section-1]];
+        }
+    
+    }
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (IBAction)closeClick:(UIButton *)sender {
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

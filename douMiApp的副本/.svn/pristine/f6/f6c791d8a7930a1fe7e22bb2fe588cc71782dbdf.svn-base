@@ -1,0 +1,29 @@
+//
+//  RootNViewController.h
+//  douMiApp
+//
+//  Created by ydz on 2016/11/8.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+
+
+@interface RootNViewController : UIViewController
+
+@property (strong, nonatomic) UIButton *redbtn;
+@property (strong, nonatomic) UIButton *playBtn;
+@property (strong, nonatomic)UILabel *lable;
+typedef NS_ENUM(NSInteger, nitem_location) {
+    nitem_left = 0,
+    nitem_right,
+    nitem_center
+};
+
+- (void)addItem:(nitem_location)location btnTitleArr:(NSArray <NSString*> *)titleArr;
+
+- (void)showLeftView:(UIButton *)btn;
+- (void)showRightView:(UIButton *)btn;
+- (void)showAlertWithTitle:(NSString *)title message:(NSString *)message handler:(void (^) (UIAlertAction *action))handler;
+@end

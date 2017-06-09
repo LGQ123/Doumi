@@ -1,0 +1,363 @@
+//
+//  NetworkRequest.m
+//  tourongzhuanjia
+//
+//  Created by 移动微世界 on 15/12/24.
+//  Copyright © 2015年 JWZhang. All rights reserved.
+//
+
+#import "NetworkRequest.h"
+#import "AFNetworking.h"
+#import "ZYKMD5.h"
+@implementation NetworkRequest
++(void)get:(NSString *)url params:(NSDictionary *)params success:(void (^)(id))success failure:(void (^)(NSError *))failure
+{
+
+    //1.获得请求管理者
+    AFHTTPSessionManager *mgr =[AFHTTPSessionManager manager];
+    
+    //设置返回的数据格式
+    mgr.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/json",@"text/html",@"text/plain",@"application/json", nil];
+    
+    //3.发送Get请求
+    [mgr GET:url parameters:params success:^(NSURLSessionDataTask *operation, NSDictionary*responseObj) {
+        NSLog(@"res =  %@",responseObj);
+        if (success) {
+            success(responseObj);
+        }
+    } failure:^(NSURLSessionDataTask *operation, NSError *error) {
+        if (failure) {
+            failure(error);
+            NSLog(@"%@",error.description);
+        }
+    }];
+    
+}
+
++(void)post:(NSString *)url params:(NSDictionary *)params success:(void (^)(id))success failure:(void (^)(NSError *))failure
+{
+    [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
+    //1.获得请求管理者
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    mgr.requestSerializer.timeoutInterval = 25;
+    
+    //设置返回的数据格式
+    mgr.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/json",@"text/html",@"text/plain",@"application/json", nil];
+    [mgr.requestSerializer
+     setValue:@"application/x-www-form-urlencoded;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];
+    
+    NSMutableDictionary *mutableDic = [[NSMutableDictionary alloc] initWithDictionary:params];
+    [mutableDic dm_setObject:[BusinessLogic getToken] forKey:@"token"];
+    
+//    NSString *signstr = [self sequenceValve:mutableDic];
+    NSLog(@"%@",[self sequenceValve:mutableDic]);
+    [mutableDic setObject:[self sequenceValve:mutableDic] forKey:@"sign"];
+    NSLog(@"%@",mutableDic);
+    NSDictionary *dic = @{@"argEncPara":[ZYKMD5 doEncryptStr:[self dictionaryToJson:mutableDic]]};
+    //2.发送Post请求
+    [mgr POST:url parameters:dic success:^(NSURLSessionDataTask *operation, NSDictionary*responseObj) {
+        [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+        NSDictionary *res = [self dictionaryWithJsonString: [ZYKMD5 doDecEncryptStr:[self decodeFromPercentEscapeString:responseObj[@"argEncPara"]]]];
+        if (success) {
+            success(res);
+            NSLog(@"%@",res);
+            if ([res[@"rescode"] isEqualToString:@"0000"]) {
+                
+            } else {
+                if ([res[@"rescode"] isEqualToString:@"1111"]) {
+                    [BusinessLogic setUUID:@""];
+                    [BusinessLogic setPhoneNo:@""];
+                    [BusinessLogic setToken:@""];
+                    [MobClick profileSignOff];
+                    
+                } else {
+                    [LCProgressHUD showMessage:res[@"resmsg"]];
+                }
+            }
+        }
+    } failure:^(NSURLSessionDataTask *operation, NSError *error) {
+        if (failure) {
+            failure(error);
+            [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+            [LCProgressHUD showMessage:@"请求超时"];
+            NSLog(@"123");
+            NSLog(@"%@",error.description);
+            
+        }
+    }];
+    
+}
+
++(void)post1:(NSString *)url params:(NSDictionary *)params success:(void (^)(id))success failure:(void (^)(NSError *))failure
+{
+    //1.获得请求管理者
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    mgr.requestSerializer.timeoutInterval = 25;
+    
+    //设置返回的数据格式
+    mgr.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/json",@"text/html",@"text/plain",@"application/json", nil];
+   /* [mgr.requestSerializer
+     setValue:@"text/html;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];*/
+    //[mgr.requestSerializer
+     //setValue:@"text/json;charset=utf-8"
+     //forHTTPHeaderField:@"Content-Type"];
+    [mgr.requestSerializer
+     setValue:@"application/x-www-form-urlencoded;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];
+    //[mgr.requestSerializer
+     //setValue:@"application/json;charset=utf-8"
+     //forHTTPHeaderField:@"Content-Type"];
+//    NSLog(@" %@",[ZYKMD5 doEncryptStr:[self dictionaryToJson:params]]);
+    NSMutableDictionary *mutableDic = [[NSMutableDictionary alloc] initWithDictionary:params];
+    [mutableDic dm_setObject:[BusinessLogic getToken] forKey:@"token"];
+    NSLog(@"%@",[self sequenceValve:mutableDic]);
+    [mutableDic setObject:[self sequenceValve:mutableDic] forKey:@"sign"];
+    NSLog(@"%@",mutableDic);
+    
+    
+    NSDictionary *dic = @{@"argEncPara":[ZYKMD5 doEncryptStr:[self dictionaryToJson:mutableDic]]};
+    //    2.发送Post请求pa
+    [mgr POST:url parameters:dic success:^(NSURLSessionDataTask *operation, NSDictionary*responseObj) {
+         NSDictionary *res = [self dictionaryWithJsonString: [ZYKMD5 doDecEncryptStr:[self decodeFromPercentEscapeString:responseObj[@"argEncPara"]]]];
+        if (success) {
+            success(res);
+            if ([res[@"rescode"] isEqualToString:@"0000"]) {
+                
+            } else {
+                if ([res[@"rescode"] isEqualToString:@"1111"]) {
+                    [BusinessLogic setUUID:@""];
+                    [BusinessLogic setPhoneNo:@""];
+                    [BusinessLogic setToken:@""];
+                    [MobClick profileSignOff];
+                    [LCProgressHUD showMessage:res[@"resmsg"]];
+                }
+            }
+            NSLog(@"%@",res);
+        }
+    } failure:^(NSURLSessionDataTask *operation, NSError *error) {
+        if (failure) {
+            failure(error);
+            NSLog(@"123");
+            NSLog(@"%@",error.description);
+        }
+    }];
+    
+}
+
+
++(void)post2:(NSString *)url params:(NSDictionary *)params success:(void (^)(id))success failure:(void (^)(NSError *))failure
+{
+//    [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
+    //1.获得请求管理者
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    mgr.requestSerializer.timeoutInterval = 25;
+    
+    //设置返回的数据格式
+    mgr.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/json",@"text/html",@"text/plain",@"application/json", nil];
+    [mgr.requestSerializer
+     setValue:@"application/x-www-form-urlencoded;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];
+    //2.发送Post请求
+    [mgr POST:url parameters:params success:^(NSURLSessionDataTask *operation, NSDictionary*responseObj) {
+//        [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+         NSDictionary *res = [self dictionaryWithJsonString: [ZYKMD5 doDecEncryptStr:[self decodeFromPercentEscapeString:responseObj[@"argEncPara"]]]];
+        if (success) {
+            success(res);
+            NSLog(@"%@",res);
+//                        if ([responseObj[@"rescode"] isEqualToString:@"0000"]) {
+//            
+//                        } else {
+//                            [LCProgressHUD showMessage:responseObj[@"resmsg"]];
+//                        }
+            
+            
+        }
+    } failure:^(NSURLSessionDataTask *operation, NSError *error) {
+        if (failure) {
+            failure(error);
+//            [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+            [LCProgressHUD showMessage:@"请求超时"];
+            NSLog(@"123");
+            NSLog(@"%@",error.description);
+            
+        }
+    }];
+    
+}
+
++ (void)post3:(NSString *)url params:(NSDictionary *)params success:(void(^)(id responseObj))success failure:(void(^)(NSError *error))failure
+{
+    //    [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
+    //1.获得请求管理者
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    mgr.requestSerializer.timeoutInterval = 25;
+    
+    //设置返回的数据格式
+    mgr.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/json",@"text/html",@"text/plain",@"application/json", nil];
+    [mgr.requestSerializer
+     setValue:@"application/x-www-form-urlencoded;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];
+    
+    NSMutableDictionary *mutableDic = [[NSMutableDictionary alloc] initWithDictionary:params];
+    NSLog(@"%@",[self sequenceValve:params]);
+    [mutableDic setObject:[self sequenceValve:params] forKey:@"sign"];
+    NSLog(@"%@",mutableDic);
+    //2.发送Post请求
+    [mgr POST:url parameters:params success:^(NSURLSessionDataTask *operation, NSDictionary*responseObj) {
+        //        [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+        
+        if (success) {
+            success(responseObj);
+            NSLog(@"%@",responseObj);
+            //                        if ([responseObj[@"rescode"] isEqualToString:@"0000"]) {
+            //
+            //                        } else {
+            //                            [LCProgressHUD showMessage:responseObj[@"resmsg"]];
+            //                        }
+            
+            
+        }
+    } failure:^(NSURLSessionDataTask *operation, NSError *error) {
+        if (failure) {
+            failure(error);
+            //            [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+            [LCProgressHUD showMessage:@"请求超时"];
+            NSLog(@"123");
+            NSLog(@"%@",error.description);
+            
+        }
+    }];
+    
+}
+
++(NSString*)dictionaryToJson:(NSDictionary *)dic
+
+{
+    NSError *parseError = nil;
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:&parseError];
+    
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    
+}
+
+
++ (NSDictionary *)dictionaryWithJsonString:(NSString *)jsonString {
+    
+    if (jsonString == nil) {
+        
+        return nil;
+        
+    }
+    
+    NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError *err;
+    
+    NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:jsonData
+                         
+                                                        options:NSJSONReadingMutableContainers
+                         
+                                                          error:&err];
+    
+    if(err) {
+        
+        NSLog(@"json解析失败：%@",err);
+        
+        return nil;
+        
+    }
+    
+    return dic;
+    
+}
+
+
+//encode编码
+
++ (NSString *)encodeToPercentEscapeString: (NSString *) input
+{
+    NSString*
+    outputStr = (__bridge NSString *)CFURLCreateStringByAddingPercentEscapes(
+                                                                             
+                                                                             NULL, /* allocator */
+                                                                             
+                                                                             (__bridge CFStringRef)input,
+                                                                             
+                                                                             NULL, /* charactersToLeaveUnescaped */
+                                                                             
+                                                                             (CFStringRef)@"!*'();:@&=+$,/?%#[]",
+                                                                             
+                                                                             kCFStringEncodingUTF8);
+    
+    return
+    outputStr;
+}
+
++ (NSString *)decodeFromPercentEscapeString: (NSString *) input
+{
+    NSMutableString *outputStr = [NSMutableString stringWithString:input];
+    [outputStr replaceOccurrencesOfString:@"+"
+                               withString:@""
+                                  options:NSLiteralSearch
+                                    range:NSMakeRange(0,
+                                                      [outputStr length])];
+    
+    return
+    [outputStr stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+}
+
+
+//参数排序
+
++ (NSString *)sequenceValve:(NSDictionary *)dic {
+    NSMutableString *str2 = [[NSMutableString alloc] init];
+    NSString *str;
+    NSArray *keyArr = [dic allKeys];
+    
+    NSArray *newArr = [keyArr sortedArrayUsingSelector:@selector(compare:)];//升序
+    NSMutableDictionary *mutableDic = [[NSMutableDictionary alloc] init];
+    for (NSString *key in newArr) {
+        //        [str appendString:[dic objectForKey:key]];
+        str =[dic objectForKey:key];
+        if (str.length == 0) {
+            
+        } else {
+            //            [mutableDic setObject:[dic objectForKey:key] forKey:key];
+            if (str2.length == 0) {
+                [str2 appendString:[NSString stringWithFormat:@"%@=%@",key,[dic objectForKey:key]]];
+            } else {
+                [str2 appendString:[NSString stringWithFormat:@"&%@=%@",key,[dic objectForKey:key]]];
+            }
+            
+        }
+    }
+    //    [mutableDic setObject:[NSString stringWithFormat:@"DMHY_APP@%@",dic[@"iface"]] forKey:@"key"];
+    
+    [str2 appendString:[NSString stringWithFormat:@"&key=DMHY_APP@%@",dic[@"iface"]]];
+    
+//    NSString *str1 = [self dictionaryToJson:mutableDic];
+    //    return str1;
+    NSLog(@"参数排序==  %@",str2);
+    
+    //    return @"";
+    return [ZYKMD5 getMd5_32Bit_String:(NSString *)str2 isUppercase:YES];
+    
+}
+
+/**
+ *  时间戳
+ *
+ *  @return string
+ */
++ (NSString *)timestampForDate {
+    NSDate* dat = [NSDate dateWithTimeIntervalSinceNow:0];
+    NSTimeInterval a=[dat timeIntervalSince1970];
+    NSString *timeString = [NSString stringWithFormat:@"%.0f", a];//时间戳
+    return timeString;
+}
+
+
+@end

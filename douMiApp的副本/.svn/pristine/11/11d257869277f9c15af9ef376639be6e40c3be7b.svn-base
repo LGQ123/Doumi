@@ -1,0 +1,206 @@
+//
+//  DM_SideslipController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/3.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DM_SideslipController.h"
+#import "Side_Cell1.h"
+#import "Side_CollectionCell.h"
+#import "Side_HeaderView.h"
+#import "DM_DisplayController.h"
+
+@interface DM_SideslipController ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+
+@property (strong, nonatomic)UICollectionView *myCollecView;
+
+@property (strong, nonatomic)NSArray *dataArr1;
+@property (strong, nonatomic)NSArray *dataArr2;
+
+@end
+
+@implementation DM_SideslipController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+    //设置单元格的尺寸
+//    flowLayout.itemSize = CGSizeMake(((SCREEN_WIDTH-SCREEN_WIDTH/5)-68)/2, 115);
+    //flowlaout的属性，横向滑动
+    flowLayout.scrollDirection = UICollectionViewScrollDirectionVertical;
+    //接下来就在创建collectionView的时候初始化，就很方便了（能直接带上layout）
+    _myCollecView= [[UICollectionView alloc] initWithFrame:CGRectMake(34, 0, (SCREEN_WIDTH-SCREEN_WIDTH/5)-68, SCREEN_HEIGHT) collectionViewLayout:flowLayout];
+    _myCollecView.backgroundColor = [UIColor whiteColor];
+    _myCollecView.delegate = self;
+    _myCollecView.dataSource = self;
+    _myCollecView.showsHorizontalScrollIndicator = NO;
+    _myCollecView.showsVerticalScrollIndicator = NO;
+    //添加到主页面上去
+    [_myCollecView registerNib:[UINib nibWithNibName:@"Side_Cell1" bundle:nil] forCellWithReuseIdentifier:@"Side_Cell1"];
+    [_myCollecView registerNib:[UINib nibWithNibName:@"Side_CollectionCell" bundle:nil] forCellWithReuseIdentifier:@"Side_CollectionCell"];
+    //header
+    [_myCollecView registerNib:[UINib nibWithNibName:@"Side_HeaderView" bundle:nil] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"Side_HeaderView"];
+    [self.view addSubview:_myCollecView];
+    
+}
+
+#pragma mark -UICollectionViewDataSource
+
+//定义每个UICollectionView 的边距
+
+
+
+-( UIEdgeInsets )collectionView:( UICollectionView *)collectionView layout:( UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:( NSInteger )section
+
+{
+    
+    return UIEdgeInsetsMake ( 0 , 0 , 0, 0 );
+    
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        return CGSizeMake((SCREEN_WIDTH-SCREEN_WIDTH/5-68)/2, 85);
+    } else {
+        return CGSizeMake((SCREEN_WIDTH-SCREEN_WIDTH/5-68)/2, 105);
+    }
+
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
+    return 0;
+
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
+    return 0;
+    
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    if (section == 0) {
+        return self.dataArr1.count;
+    } else {
+        return self.dataArr2.count;
+    }
+}
+
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
+    Side_HeaderView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"Side_HeaderView" forIndexPath:indexPath];
+    if (indexPath.section == 0) {
+        headerView.titleLable.text = @"个性分类";
+    } else {
+        headerView.titleLable.text = @"平台分类";
+    }
+    return headerView;
+
+}
+
+-(CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section{
+    if (section == 0) {
+        return CGSizeMake((SCREEN_WIDTH-SCREEN_WIDTH/5)-68, 110);
+    } else {
+        return CGSizeMake((SCREEN_WIDTH-SCREEN_WIDTH/5)-68, 70);
+    }
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 2;
+}
+
+//构建单元格
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    if (indexPath.section == 0) {
+        Side_CollectionCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"Side_CollectionCell" forIndexPath:indexPath];
+        cell.icImage.image = [UIImage imageNamed:self.dataArr1[indexPath.row]];
+        cell.nameLable.text = self.dataArr1[indexPath.row];
+        return cell;
+    } else {
+        Side_Cell1 *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"Side_Cell1" forIndexPath:indexPath];
+        cell.icImage.image = [UIImage imageNamed:self.dataArr2[indexPath.row]];
+        cell.nameLable.text = self.dataArr2[indexPath.row];
+        if (indexPath.row>1) {
+            cell.qiDaiLAble.hidden = NO;
+        }
+        return cell;
+    }
+}
+
+//UICollectionView被选中时调用的方法
+
+-( void )collectionView:( UICollectionView *)collectionView didSelectItemAtIndexPath:( NSIndexPath *)indexPath
+
+{
+    
+    if (indexPath.section == 0) {
+        DM_DisplayController *dm_sideVC = [[DM_DisplayController alloc] init];
+        dm_sideVC.type = @"side";
+        if (indexPath.row <=4) {
+            dm_sideVC.page = indexPath.row+3;
+        } else {
+            dm_sideVC.page = 0;
+        }
+//        [self.navigationController pushViewController:dm_sideVC animated:YES];
+        [self presentViewController:[[UINavigationController alloc] initWithRootViewController:dm_sideVC] animated:YES completion:nil];
+       
+    } else {
+        if (indexPath.row < 2) {
+            DM_DisplayController *dm_sideVC = [[DM_DisplayController alloc] init];
+            dm_sideVC.type = @"side";
+            dm_sideVC.page = indexPath.row+8;
+             [self presentViewController:[[UINavigationController alloc] initWithRootViewController:dm_sideVC] animated:YES completion:nil];
+        } else {
+            
+        }
+    
+    }
+    
+}
+
+//返回这个UICollectionViewCell是否可以被选择
+
+-( BOOL )collectionView:( UICollectionView *)collectionView shouldSelectItemAtIndexPath:( NSIndexPath *)indexPath
+{
+    
+    return YES ;
+    
+}
+
+
+//懒加载
+- (NSArray *)dataArr1 {
+    if (!_dataArr1) {
+        _dataArr1 = @[@"游戏",@"明星",@"脱口秀",@"娱乐",@"户外",@"全部"];
+    }
+    return _dataArr1;
+}
+
+- (NSArray *)dataArr2 {
+    if (!_dataArr2) {
+        _dataArr2 = @[@"YY直播",@"熊猫TV",@"斗鱼直播",@"映客直播"];
+    }
+    return _dataArr2;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

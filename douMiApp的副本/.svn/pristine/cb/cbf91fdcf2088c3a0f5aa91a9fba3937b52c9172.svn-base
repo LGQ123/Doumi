@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Side_Cell1" id="gTV-IL-0wX" customClass="Side_Cell1">
+            <rect key="frame" x="0.0" y="0.0" width="166" height="148"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="166" height="148"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="YY直播" translatesAutoresizingMaskIntoConstraints="NO" id="RQb-Ib-QYB">
+                        <rect key="frame" x="57" y="25" width="52" height="52"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="52" id="6gl-Yp-dTm"/>
+                            <constraint firstAttribute="width" constant="52" id="IOV-cR-A0V"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0bM-vE-3LD">
+                        <rect key="frame" x="0.0" y="82" width="166" height="13"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="13" id="fVl-69-fET"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                        <color key="textColor" red="0.15684366229999999" green="0.15687647460000001" blue="0.15683674810000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="(敬请期待)" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tCv-e4-kxq">
+                        <rect key="frame" x="0.0" y="95" width="166" height="10"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="10" id="tQK-yX-CnE"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                        <color key="textColor" red="0.54896527528762817" green="0.54905885457992554" blue="0.54894548654556274" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+            </view>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="tCv-e4-kxq" secondAttribute="trailing" id="7RT-p8-kW8"/>
+                <constraint firstItem="RQb-Ib-QYB" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="25" id="9mP-yd-bjT"/>
+                <constraint firstItem="tCv-e4-kxq" firstAttribute="top" secondItem="0bM-vE-3LD" secondAttribute="bottom" id="AgY-p5-ngR"/>
+                <constraint firstItem="0bM-vE-3LD" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="BL2-kZ-ms8"/>
+                <constraint firstItem="tCv-e4-kxq" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="LAZ-ML-OdO"/>
+                <constraint firstItem="RQb-Ib-QYB" firstAttribute="centerX" secondItem="gTV-IL-0wX" secondAttribute="centerX" id="MeH-Ec-6B4"/>
+                <constraint firstItem="0bM-vE-3LD" firstAttribute="centerX" secondItem="gTV-IL-0wX" secondAttribute="centerX" id="UFK-8J-XBz"/>
+                <constraint firstAttribute="trailing" secondItem="0bM-vE-3LD" secondAttribute="trailing" id="l0k-fW-npV"/>
+                <constraint firstItem="0bM-vE-3LD" firstAttribute="top" secondItem="RQb-Ib-QYB" secondAttribute="bottom" constant="5" id="uWa-yV-QWE"/>
+            </constraints>
+            <size key="customSize" width="166" height="148"/>
+            <connections>
+                <outlet property="icImage" destination="RQb-Ib-QYB" id="WMd-QI-MLJ"/>
+                <outlet property="nameLable" destination="0bM-vE-3LD" id="Upw-nN-Lgk"/>
+                <outlet property="qiDaiLAble" destination="tCv-e4-kxq" id="2af-fb-jfs"/>
+            </connections>
+            <point key="canvasLocation" x="93" y="103"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="YY直播" width="52" height="52"/>
+    </resources>
+</document>

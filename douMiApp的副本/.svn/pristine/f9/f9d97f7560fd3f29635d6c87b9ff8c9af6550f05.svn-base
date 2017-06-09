@@ -1,0 +1,20 @@
+//
+//  RefundCell.h
+//  douMiApp
+//
+//  Created by ydz on 2017/1/11.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface RefundCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UIScrollView *myScrollView;
+
+@property (strong, nonatomic) UILabel *number;
+
+@property (strong, nonatomic) UILabel *daiHuanBX;
+
+@property (strong, nonatomic) UIButton *chooseBtn;
+
+@end

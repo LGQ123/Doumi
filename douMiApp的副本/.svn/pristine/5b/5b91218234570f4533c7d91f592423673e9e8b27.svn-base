@@ -1,0 +1,47 @@
+//
+//  DM_BelowCell.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/8.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DM_BelowCell.h"
+
+@implementation DM_BelowCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+    self.backgroundColor = RGBA(247, 247, 247, 1);
+    _messageImg.userInteractionEnabled = YES;
+    UITapGestureRecognizer *imageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(messageImageTap:)];
+    [_messageImg addGestureRecognizer:imageTap];
+    UITapGestureRecognizer *textTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(messagetextTap:)];
+    [_messageView addGestureRecognizer:textTap];
+}
+- (IBAction)messageTouch:(UIButton *)sender {
+    if ([self.delegate respondsToSelector:@selector(check:)]) {
+        [self.delegate check:self];
+    }
+}
+
+- (void)messageImageTap:(UITapGestureRecognizer *)tap {
+    if ([self.delegate respondsToSelector:@selector(details:)]) {
+        [self.delegate details:self];
+    }
+}
+
+- (void)messagetextTap:(UITapGestureRecognizer *)tap {
+    if ([self.delegate respondsToSelector:@selector(details:)]) {
+        [self.delegate details:self];
+    }
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

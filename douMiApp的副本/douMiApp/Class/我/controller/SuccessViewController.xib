@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SuccessViewController">
+            <connections>
+                <outlet property="successLable" destination="nPD-Py-enA" id="LdH-TP-D4C"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="礼物" translatesAutoresizingMaskIntoConstraints="NO" id="GB2-1F-4Wu">
+                    <rect key="frame" x="132" y="109" width="110" height="134"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="GB2-1F-4Wu" secondAttribute="height" multiplier="55:67" id="TaO-h7-CKJ"/>
+                    </constraints>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="提现申请已提交，请耐心等待 " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nPD-Py-enA">
+                    <rect key="frame" x="23" y="288" width="328" height="21"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="21" id="uhA-9g-A17"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                    <color key="textColor" red="0.16076493263244629" green="0.16079831123352051" blue="0.16075783967971802" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="0.96853548288345337" green="0.96869391202926636" blue="0.9685017466545105" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="GB2-1F-4Wu" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="109" id="4NB-e0-WJ4"/>
+                <constraint firstItem="GB2-1F-4Wu" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="132" id="IL9-Mn-W7f"/>
+                <constraint firstAttribute="trailing" secondItem="nPD-Py-enA" secondAttribute="trailing" constant="24" id="Okp-lu-WaV"/>
+                <constraint firstItem="nPD-Py-enA" firstAttribute="top" secondItem="GB2-1F-4Wu" secondAttribute="bottom" constant="45" id="ZUt-C2-blR"/>
+                <constraint firstAttribute="trailing" secondItem="GB2-1F-4Wu" secondAttribute="trailing" constant="133" id="jlH-Jc-B0O"/>
+                <constraint firstItem="nPD-Py-enA" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="23" id="qio-s1-aRj"/>
+            </constraints>
+            <point key="canvasLocation" x="33.5" y="97.5"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="礼物" width="110" height="134"/>
+    </resources>
+</document>

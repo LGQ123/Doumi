@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root name="中国">
+
+  <province name="江苏省" postcode="0" >
+    <city name="全部" postcode="0" ></city>
+    <city name="南京市" postcode="1" ></city>
+    <city name="镇江市" postcode="2" ></city>
+    <city name="扬州市" postcode="3" ></city>
+    <city name="苏州市" postcode="4" ></city>
+    <city name="无锡市" postcode="5" > </city>
+    <city name="淮安市" postcode="6" > </city>
+    <city name="连云港市" postcode="7"></city>
+    <city name="南通市" postcode="8" > </city>
+    <city name="泰州市" postcode="9" ></city>
+    <city name="宿迁市" postcode="10" ></city>
+    <city name="徐州市" postcode="11" ></city>
+    <city name="盐城市" postcode="12" ></city>
+     <city name="常州" postcode="13" ></city>
+  </province>
+  <province name="山东省" postcode="1">
+    <city name="全部" postcode="0" ></city>
+    <city name="青岛市" postcode="1" > </city>
+    <city name="即墨市" postcode="2" > </city>
+  </province>
+
+  <province name="上海市" postcode="2" >
+  <city name="全部" postcode="0" ></city>
+    <city name="上海市" postcode="1" >
+     
+    </city>
+   
+  </province>
+
+  <province name="浙江省" postcode="3" >
+  <city name="全部" postcode="0" ></city>
+    <city name="杭州市" postcode="1" >
+       
+    </city>
+    
+  </province>
+
+  <province name="重庆市" postcode="4" >
+  <city name="全部" postcode="0" ></city>
+    <city name="重庆市" postcode="1" >
+        
+    </city>
+   
+  </province>
+
+  <province name="广西省" postcode="5" >
+  <city name="全部" postcode="0" ></city>
+    <city name="柳州市" postcode="1" >
+       
+    </city>
+   
+  </province>
+
+  <province name="安徽省" postcode="6" >
+  <city name="全部" postcode="0" ></city>
+    <city name="合肥市" postcode="1" >
+       
+    </city>
+    
+  </province>
+
+  <province name="陕西省" postcode="7" >
+  <city name="全部" postcode="0" ></city>
+    <city name="西安市" postcode="1" ></city>
+   
+  </province>
+
+  <province name="辽宁省" postcode="8">
+  <city name="全部" postcode="0" ></city>
+    <city name="大连市" postcode="1"></city>
+ 
+  </province>
+</root>

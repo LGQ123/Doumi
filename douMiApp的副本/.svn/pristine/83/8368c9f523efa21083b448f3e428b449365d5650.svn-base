@@ -1,0 +1,185 @@
+//
+//  NetworkRequest.m
+//  tourongzhuanjia
+//
+//  Created by 移动微世界 on 15/12/24.
+//  Copyright © 2015年 JWZhang. All rights reserved.
+//
+
+#import "NetworkRequest.h"
+#import "AFNetworking.h"
+#import "ZYKMD5.h"
+@implementation NetworkRequest
++(void)get:(NSString *)url params:(NSDictionary *)params success:(void (^)(id))success failure:(void (^)(NSError *))failure
+{
+
+    //1.获得请求管理者
+    AFHTTPSessionManager *mgr =[AFHTTPSessionManager manager];
+    
+    //设置返回的数据格式
+    mgr.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/json",@"text/html",@"text/plain",@"application/json", nil];
+    
+    //3.发送Get请求
+    [mgr GET:url parameters:params success:^(NSURLSessionDataTask *operation, NSDictionary*responseObj) {
+        NSLog(@"res =  %@",responseObj);
+        if (success) {
+            success(responseObj);
+        }
+    } failure:^(NSURLSessionDataTask *operation, NSError *error) {
+        if (failure) {
+            failure(error);
+            NSLog(@"%@",error.description);
+        }
+    }];
+    
+}
+
++(void)post:(NSString *)url params:(NSDictionary *)params success:(void (^)(id))success failure:(void (^)(NSError *))failure
+{
+    [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
+    //1.获得请求管理者
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    mgr.requestSerializer.timeoutInterval = 10;
+    
+    //设置返回的数据格式
+    mgr.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/json",@"text/html",@"text/plain",@"application/json", nil];
+    //2.发送Post请求
+    [mgr POST:url parameters:params success:^(NSURLSessionDataTask *operation, NSDictionary*responseObj) {
+        [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+        if (success) {
+            success(responseObj);
+            NSLog(@"%@",responseObj);
+            if ([responseObj[@"rescode"] isEqualToString:@"0000"]) {
+                
+            } else {
+                [LCProgressHUD showMessage:responseObj[@"resmsg"]];
+            }
+            
+            
+        }
+    } failure:^(NSURLSessionDataTask *operation, NSError *error) {
+        if (failure) {
+            failure(error);
+            [MBProgressHUD hideHUDForView:[UIApplication sharedApplication].keyWindow animated:YES];
+            [LCProgressHUD showMessage:@"请求超时"];
+            NSLog(@"123");
+            NSLog(@"%@",error.description);
+            
+        }
+    }];
+    
+}
+
++(void)post1:(NSString *)url params:(NSDictionary *)params success:(void (^)(id))success failure:(void (^)(NSError *))failure
+{
+    //1.获得请求管理者
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    mgr.requestSerializer.timeoutInterval = 10;
+    
+    //设置返回的数据格式
+    mgr.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/json",@"text/html",@"text/plain",@"application/json", nil];
+    /*[mgr.requestSerializer
+     setValue:@"text/html;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];
+    [mgr.requestSerializer
+     setValue:@"text/json;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];
+    [mgr.requestSerializer
+     setValue:@"text/plain;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];
+    [mgr.requestSerializer
+     setValue:@"application/json;charset=utf-8"
+     forHTTPHeaderField:@"Content-Type"];*/
+    //2.发送Post请求
+    [mgr POST:url parameters:params success:^(NSURLSessionDataTask *operation, NSDictionary*responseObj) {
+        if (success) {
+            success(responseObj);
+            NSLog(@"%@",responseObj);
+        }
+    } failure:^(NSURLSessionDataTask *operation, NSError *error) {
+        if (failure) {
+            failure(error);
+            NSLog(@"123");
+            NSLog(@"%@",error.description);
+        }
+    }];
+    
+}
+
+
++(NSString*)dictionaryToJson:(NSDictionary *)dic
+
+{
+    NSError *parseError = nil;
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:&parseError];
+    
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    
+}
+
+
+//encode编码
+
++ (NSString *)encodeToPercentEscapeString: (NSString *) input
+{
+    NSString*
+    outputStr = (__bridge NSString *)CFURLCreateStringByAddingPercentEscapes(
+                                                                             
+                                                                             NULL, /* allocator */
+                                                                             
+                                                                             (__bridge CFStringRef)input,
+                                                                             
+                                                                             NULL, /* charactersToLeaveUnescaped */
+                                                                             
+                                                                             (CFStringRef)@"!*'();:@&=+$,/?%#[]",
+                                                                             
+                                                                             kCFStringEncodingUTF8);
+    
+    return
+    outputStr;
+}
+
++ (NSString *)decodeFromPercentEscapeString: (NSString *) input
+{
+    NSMutableString *outputStr = [NSMutableString stringWithString:input];
+    [outputStr replaceOccurrencesOfString:@"+"
+                               withString:@""
+                                  options:NSLiteralSearch
+                                    range:NSMakeRange(0,
+                                                      [outputStr length])];
+    
+    return
+    [outputStr stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+}
+
+
+//参数排序
+
++ (NSString *)sequenceValve:(NSDictionary *)dic {
+    NSMutableString *str = [[NSMutableString alloc] init];
+    NSArray *keyArr = [dic allKeys];
+    
+    NSArray *newArr = [keyArr sortedArrayUsingSelector:@selector(compare:)];//升序
+    NSMutableDictionary *mutableDic = [[NSMutableDictionary alloc] init];
+    for (NSString *key in newArr) {
+        [str appendString:[dic objectForKey:key]];
+    }
+    return [ZYKMD5 getMd5_32Bit_String:(NSString *)str isUppercase:NO];
+
+}
+
+/**
+ *  时间戳
+ *
+ *  @return string
+ */
++ (NSString *)timestampForDate {
+    NSDate* dat = [NSDate dateWithTimeIntervalSinceNow:0];
+    NSTimeInterval a=[dat timeIntervalSince1970];
+    NSString *timeString = [NSString stringWithFormat:@"%.0f", a];//时间戳
+    return timeString;
+}
+
+
+@end

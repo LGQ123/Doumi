@@ -1,0 +1,326 @@
+//
+//  SuperBoController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/14.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "SuperBoController.h"
+#import "NewPagedFlowView.h"
+#import "PGIndexBannerSubiew.h"
+#import "SuperBoCell.h"
+#import "SuperBoMode.h"
+#import "mpViewController.h"
+#import <UMSocialCore/UMSocialCore.h>
+
+#import <UShareUI/UMSocialUIManager.h>
+#import <SDWebImage/UIImage+MultiFormat.h>
+#import "DM_LoginController.h"
+@interface SuperBoController ()<UITableViewDelegate,UITableViewDataSource,NewPagedFlowViewDelegate, NewPagedFlowViewDataSource,superDelegate>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+/**
+ *  图片数组
+ */
+@property (nonatomic, strong) NSArray *imageArray;
+
+/**
+ *  轮播图
+ */
+@property (nonatomic, strong) NewPagedFlowView *pageFlowView;
+
+@property (nonatomic, strong) SuperBoMode *mode;
+
+@property (copy, nonatomic) NSString *sharecontent;
+
+@property (copy, nonatomic) NSString *shareID;
+@property (strong, nonatomic)UIImage *shareImage;
+@end
+
+@implementation SuperBoController
+
+
+- (void)dealloc {
+    
+    /****************************
+     在dealloc或者返回按钮里停止定时器
+     ****************************/
+    
+    [self.pageFlowView stopTimer];
+}
+
+- (void)request_Api {
+    
+    __weak UITableView *tableView = _myTableView;
+    NSDictionary *dic;
+    if ([BusinessLogic uuid].length == 0) {
+     dic = @{@"iface":@"DMHY700001"};
+    } else {
+        dic = @{@"iface":@"DMHY700001",@"userId":[BusinessLogic uuid]};
+    }
+    
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        _mode = [SuperBoMode mj_objectWithKeyValues:responseObj];
+        [_pageFlowView reloadData];
+        [tableView reloadData];
+        
+    } failure:^(NSError *error) {
+        
+    }];
+    
+    
+
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    [MobClick beginLogPageView:@"娱乐超级播"];
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"娱乐超级播"];
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    self.lable.text = @"娱乐超级播";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    [_myTableView registerNib:[UINib nibWithNibName:@"SuperBoCell" bundle:nil] forCellReuseIdentifier:@"SuperBoCell"];
+    _myTableView.backgroundColor = RGBA(247, 247, 247, 1);
+    [self request_Api];
+}
+
+#pragma mark-tableViewDelegate
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 1;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return _mode.hashMapList.count+1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 10;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+   
+    if (indexPath.section == 0) {
+        return (SCREEN_WIDTH - 56)/2;
+    } else {
+         return 80+SCREEN_WIDTH*200/375;
+    }
+
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 0) {
+        
+        static NSString *cellID = @"ID3D";
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
+        if (!cell) {
+              cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+            _pageFlowView = [[NewPagedFlowView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, (SCREEN_WIDTH - 56)/2)];
+            _pageFlowView.backgroundColor = [UIColor whiteColor];
+            _pageFlowView.delegate = self;
+            _pageFlowView.dataSource = self;
+            _pageFlowView.minimumPageAlpha = 0.1;
+            _pageFlowView.minimumPageScale = 0.9;
+            _pageFlowView.orientation = NewPagedFlowViewOrientationHorizontal;
+            
+            //提前告诉有多少页
+            _pageFlowView.orginPageCount = _mode.questions.count;
+            
+            _pageFlowView.isOpenAutoScroll = YES;
+            
+            [cell.contentView addSubview:_pageFlowView];
+            [_pageFlowView reloadData];
+        }
+        
+        return cell;
+    }
+    
+    else {
+    
+        
+    SuperBoCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SuperBoCell"];
+    cell.mode = _mode.hashMapList[indexPath.section-1];
+        cell.ID = indexPath.section-1;
+    cell.delegate = self;
+    return cell;
+    
+    }
+
+}
+
+
+- (void)superMVTouch:(NSInteger)ID andShuID:(NSInteger)SID {
+    
+    mpViewController *mpVC = [[mpViewController alloc] initWithNibName:@"mpViewController" bundle:nil];
+    mpVC.titleStr = _mode.hashMapList[SID].ents[ID].mainTitle;
+    
+//    NSString *videoStr = [NetworkRequest encodeToPercentEscapeString:_mode.hashMapList[SID].ents[ID].videoPath];
+    
+    NSString *videoStr = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_mode.hashMapList[SID].ents[ID].videoPath, NULL, NULL, kCFStringEncodingUTF8));
+    mpVC.mvStr = videoStr;
+    
+    NSLog(@"%@",videoStr);
+    
+    [self.navigationController pushViewController:mpVC animated:YES];
+    
+}
+
+- (void)superLikeTouch:(NSInteger)ID andShuID:(NSInteger)SID {
+    [MobClick event:@"superLike"];
+    
+    if ([BusinessLogic uuid].length == 0) {
+        DM_LoginController *dmVC = [[DM_LoginController alloc] initWithNibName:@"DM_LoginController" bundle:nil];
+        [self.navigationController pushViewController:dmVC animated:YES];
+        
+    } else {
+        __weak UITableView *tableView = _myTableView;
+        NSDictionary *dic = @{@"iface":@"DMHY300003",@"userId":[BusinessLogic uuid],@"dynId":[NSString stringWithFormat:@"%ld",(long)_mode.hashMapList[SID].ents[ID].Id],@"type":@"3"};
+    if ([_mode.hashMapList[SID].ents[ID].thumbup isEqualToString:@"0"]) {
+        [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+            _mode.hashMapList[SID].ents[ID].thumbup = @"1";
+            _mode.hashMapList[SID].ents[ID].theTotalNumberOf++;
+            [tableView reloadData];
+        } failure:^(NSError *error) {
+            
+        }];
+    } else {
+        [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+            _mode.hashMapList[SID].ents[ID].thumbup = @"0";
+            _mode.hashMapList[SID].ents[ID].theTotalNumberOf--;
+            [tableView reloadData];
+        } failure:^(NSError *error) {
+            
+        }];
+    }
+    }
+    
+}
+
+- (void)superShareTouch:(NSInteger)ID andShuID:(NSInteger)SID {
+    
+    _sharecontent = _mode.hashMapList[SID].ents[ID].content;
+    _shareID = _mode.hashMapList[SID].ents[ID].xname;
+    _shareImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:_mode.hashMapList[SID].ents[ID].videoCover]]];
+    __weak typeof(self) weakSelf = self;
+    //显示分享面板
+    
+    [UMSocialUIManager showShareMenuViewInWindowWithPlatformSelectionBlock:^(UMSocialPlatformType platformType, NSDictionary *userInfo) {
+        [weakSelf shareWebPageToPlatformType:platformType];
+    }];
+    
+    
+}
+
+- (void)shareWebPageToPlatformType:(UMSocialPlatformType)platformType
+{
+    //创建分享消息对象
+    UMSocialMessageObject *messageObject = [UMSocialMessageObject messageObject];
+    
+    //创建网页内容对象
+    UMShareWebpageObject *shareObject = [UMShareWebpageObject shareObjectWithTitle:_shareID descr:_sharecontent thumImage:_shareImage];
+    //设置网页地址
+    shareObject.webpageUrl =SuperIP;
+    
+    //分享消息对象设置分享内容对象
+    messageObject.shareObject = shareObject;
+    
+    //调用分享接口
+    [[UMSocialManager defaultManager] shareToPlatform:platformType messageObject:messageObject currentViewController:self completion:^(id data, NSError *error) {
+        if (error) {
+            NSLog(@"************Share fail with error %@*********",error);
+        }else{
+            NSLog(@"response data is %@",data);
+        }
+    }];
+}
+
+//
+//- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+//    // Return YES for supported orientations
+//    return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+//}
+
+#pragma mark NewPagedFlowView Delegate
+- (CGSize)sizeForPageInFlowView:(NewPagedFlowView *)flowView {
+    return CGSizeMake(SCREEN_WIDTH - 56, (SCREEN_WIDTH - 56)/2);
+}
+
+- (void)didSelectCell:(UIView *)subView withSubViewIndex:(NSInteger)subIndex {
+    
+    NSLog(@"点击了第%ld张图",(long)subIndex + 1);
+    
+//    self.indicateLabel.text = [NSString stringWithFormat:@"点击了第%ld张图",(long)subIndex + 1];
+    mpViewController *mpVC = [[mpViewController alloc] initWithNibName:@"mpViewController" bundle:nil];
+    mpVC.titleStr = _mode.questions[subIndex].mainTitle;
+    NSString *videoStr = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_mode.questions[subIndex].videoPath, NULL, NULL, kCFStringEncodingUTF8));
+    mpVC.mvStr = videoStr;
+    [self.navigationController pushViewController:mpVC animated:YES];
+}
+
+#pragma mark NewPagedFlowView Datasource
+- (NSInteger)numberOfPagesInFlowView:(NewPagedFlowView *)flowView {
+    
+    return _mode.questions.count;
+    
+}
+
+- (UIView *)flowView:(NewPagedFlowView *)flowView cellForPageAtIndex:(NSInteger)index{
+    PGIndexBannerSubiew *bannerView = (PGIndexBannerSubiew *)[flowView dequeueReusableCell];
+    if (!bannerView) {
+        bannerView = [[PGIndexBannerSubiew alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH - 56, (SCREEN_WIDTH - 56)/2)];
+    }
+    //在这里下载网络图片
+//      [bannerView.mainImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",self.imageArray[index]] placeholderImage:[UIImage imageNamed:@""]]];
+//    bannerView.mainImageView.image = self.imageArray[index];
+    [bannerView.mainImageView  sd_setImageWithURL:[NSURL URLWithString:_mode.questions[index].videoCover] placeholderImage:[UIImage imageNamed:@"dog"]];
+    bannerView.titleLable.text = _mode.questions[index].mainTitle;
+    return bannerView;
+}
+
+- (void)didScrollToPage:(NSInteger)pageNumber inFlowView:(NewPagedFlowView *)flowView {
+    
+    NSLog(@"ViewController 滚动到了第%ld页",(long)pageNumber);
+}
+
+
+
+#pragma mark --懒加载
+//- (NSArray *)imageArray {
+//    if (_imageArray == nil) {
+//        _imageArray = [[NSArray alloc] init];
+//    }
+//    return _imageArray;
+//}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

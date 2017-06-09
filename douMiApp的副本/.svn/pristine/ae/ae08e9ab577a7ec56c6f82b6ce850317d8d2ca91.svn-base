@@ -1,0 +1,13 @@
+//
+//  DTRewardViewController.h
+//  douMiApp
+//
+//  Created by edz on 2016/12/26.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "RootNViewController.h"
+
+@interface DTRewardViewController : RootNViewController<UITextViewDelegate, UITextFieldDelegate>
+
+@end

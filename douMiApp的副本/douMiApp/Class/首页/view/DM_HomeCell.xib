@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="dm_home" id="KGk-i7-Jjw" customClass="DM_HomeCell">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="400"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="375" height="399"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="activeover" translatesAutoresizingMaskIntoConstraints="NO" id="8ei-ib-NiR">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="100"/>
+                        <constraints>
+                            <constraint firstAttribute="width" secondItem="8ei-ib-NiR" secondAttribute="height" multiplier="15:4" id="GQz-3N-Tgg"/>
+                        </constraints>
+                    </imageView>
+                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Xca-mj-yOI">
+                        <rect key="frame" x="0.0" y="110" width="95" height="289.5"/>
+                        <subviews>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U0C-mR-SBe">
+                                <rect key="frame" x="10" y="20" width="60" height="60"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="60" id="5Dj-Y9-lRw"/>
+                                    <constraint firstAttribute="height" constant="60" id="bwV-5D-Za9"/>
+                                </constraints>
+                                <state key="normal" backgroundImage="hot"/>
+                                <connections>
+                                    <action selector="hotTouch:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="ZbH-Z7-qBO"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="U0C-mR-SBe" firstAttribute="top" secondItem="Xca-mj-yOI" secondAttribute="top" constant="20" id="0rh-7F-FGt"/>
+                            <constraint firstAttribute="width" constant="95" id="edW-nu-utw"/>
+                            <constraint firstItem="U0C-mR-SBe" firstAttribute="leading" secondItem="Xca-mj-yOI" secondAttribute="leading" constant="10" id="iDI-LM-9Al"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="Xca-mj-yOI" firstAttribute="top" secondItem="8ei-ib-NiR" secondAttribute="bottom" constant="10" id="CMa-UD-Vrz"/>
+                    <constraint firstAttribute="bottom" secondItem="Xca-mj-yOI" secondAttribute="bottom" id="TwP-eN-XZP"/>
+                    <constraint firstAttribute="trailing" secondItem="8ei-ib-NiR" secondAttribute="trailing" id="cCb-Sd-5Ao"/>
+                    <constraint firstItem="8ei-ib-NiR" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="exe-qw-UtC"/>
+                    <constraint firstItem="8ei-ib-NiR" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="ffc-ck-59P"/>
+                    <constraint firstItem="Xca-mj-yOI" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="mvE-5N-9FB"/>
+                </constraints>
+            </tableViewCellContentView>
+            <color key="backgroundColor" red="0.96853548288345337" green="0.96869391202926636" blue="0.9685017466545105" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <connections>
+                <outlet property="adImage" destination="8ei-ib-NiR" id="xCC-ME-zF2"/>
+            </connections>
+            <point key="canvasLocation" x="33.5" y="54"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="activeover" width="86" height="70"/>
+        <image name="hot" width="150" height="150"/>
+    </resources>
+</document>

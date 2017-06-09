@@ -1,0 +1,82 @@
+//
+//  CheckEarlierCell.m
+//  douMiApp
+//
+//  Created by ydz on 2016/12/30.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "CheckEarlierCell.h"
+
+@interface CheckEarlierCell ()
+
+@property (nonatomic, strong)UIView *view;
+@property (nonatomic, strong)UILabel *lable;
+@property (nonatomic, strong)UIImageView *iv;
+
+
+@end
+
+@implementation CheckEarlierCell
+
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if([super initWithStyle:style reuseIdentifier:reuseIdentifier])
+    {
+        [self createCellView];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+
+
+- (void)createCellView{
+    self.view = [[UIView alloc] init];
+    self.view.backgroundColor = RGBA(60, 60, 60, 1);
+    [self.contentView addSubview:self.view];
+    
+    self.lable = [[UILabel alloc] init];
+    self.lable.text = @"查看更早的消息…";
+    self.lable.textColor = [UIColor whiteColor];
+    self.lable.textAlignment = NSTextAlignmentCenter;
+    self.lable.font = [UIFont systemFontOfSize:12];
+    [self.contentView addSubview:self.lable];
+    
+    self.iv = [[UIImageView alloc] init];
+    self.iv.image = [UIImage imageNamed:@"bottom"];
+    [self.contentView addSubview:self.iv];
+    
+    [self.view mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.mas_equalTo(self.contentView);
+        make.left.equalTo(self.contentView.mas_left).offset(87);
+        make.top.equalTo(self.contentView.mas_top).offset(20);
+    }];
+    
+    [self.lable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.mas_equalTo(self.contentView);
+        make.top.equalTo(self.contentView.mas_top).offset(34);
+        make.width.equalTo(@100);
+    }];
+    
+    [self.iv mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self.contentView.mas_centerY);
+        make.right.equalTo(self.contentView.mas_right).offset(-97);
+        make.width.equalTo(@15);
+        make.height.equalTo(@9);
+    }];
+    
+}
+
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

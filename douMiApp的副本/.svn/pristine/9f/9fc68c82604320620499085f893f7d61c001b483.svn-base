@@ -1,0 +1,62 @@
+//
+//  DMMeDouJiaViewController.m
+//  douMiApp
+//
+//  Created by edz on 2017/1/10.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "DMMeDouJiaViewController.h"
+
+@interface DMMeDouJiaViewController ()
+
+@end
+
+@implementation DMMeDouJiaViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsCompact];
+    [self.navigationController.navigationBar setShadowImage:[UIImage new]];
+    self.navigationController.navigationBar.hidden=NO;
+    self.navigationItem.hidesBackButton = YES;
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:0];
+}
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    
+    // 设置页面背景渐变色
+    UIView *bgView = [[UIView alloc] initWithFrame:self.view.frame];
+    [self.view addSubview:bgView];
+    
+    CAGradientLayer *layer = [CAGradientLayer new];
+    layer.colors = @[(__bridge id)RGBA(255, 42, 80, 1).CGColor, (__bridge id)RGBA(8, 145, 232, 1).CGColor];
+    layer.startPoint = CGPointMake(0.3, 0);
+    layer.endPoint = CGPointMake(0.5, 1);
+//    layer.locations = @[@(0.5f), @(1.0f)]; // 设置颜色分割点（范围：0-1）
+    layer.frame = bgView.bounds;
+    [bgView.layer addSublayer:layer];
+    
+    
+    [self addItem:nitem_left btnTitleArr:@[@"BackW"]];
+    [self addItem:nitem_right btnTitleArr:@[@"ask2"]]; ///////// ask2图片不对
+    self.lable.text = @"蜜豆荚";
+    
+}
+
+
+
+
+
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+
+@end

@@ -1,0 +1,115 @@
+//
+//  DMMeDouJiaPayForViewController.m
+//  douMiApp
+//
+//  Created by edz on 2017/1/12.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "DMMeDouJiaPayForViewController.h"
+#import "DMBaseModel.h"
+#import "DMMeDouJiaModel.h"
+
+@interface DMMeDouJiaPayForViewController ()
+
+@property (nonatomic, strong) NSString *money;
+
+@end
+
+@implementation DMMeDouJiaPayForViewController
+
+- (instancetype)initWithMoney:(NSString *)money {
+    self = [super init];
+    if (self) {
+        _money = money;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+}
+
+
+- (void)requestWithPassword:(NSString *)password {
+    __weak __typeof(self) weakSelf = self;
+
+    NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+    [dic dm_setObject:@"DMHY200011" forKey:@"iface"];
+    [dic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+    [dic dm_setObject:password forKey:@"tradePwd"];
+    
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        
+        DMBaseModel *model = [DMBaseModel mj_objectWithKeyValues:responseObj];
+        if ([model.rescode isEqualToString:@"0000"]) {
+            
+            if (_type == DMPayForRollTypeIn) { // 转入
+                
+                NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+                [dic dm_setObject:@"DMHY600004" forKey:@"iface"];
+                [dic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+                [dic dm_setObject:weakSelf.money forKey:@"subAmount"]; // 认购金额
+                [dic dm_setObject:@"3" forKey:@"source"]; // 1：PC端；2：微信；3:app
+                
+                [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+                    DMMeDouRollInOutModel *model = [DMMeDouRollInOutModel mj_objectWithKeyValues:responseObj];
+                    if ([model.rescode isEqualToString:@"0000"]) {
+                        NSLog(@"------转入----支付成功----------");
+                        [weakSelf toRootViewController]; // 回到第一个视图
+                    } else {
+                        weakSelf.errorLab.text = model.resmsg;
+                    }
+                } failure:^(NSError *error) {
+                    
+                }];
+                
+            } else { // 转出
+                
+                NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+                [dic dm_setObject:@"DMHY600005" forKey:@"iface"];
+                [dic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+                [dic dm_setObject:weakSelf.money forKey:@"redeemAmount"];
+                [dic dm_setObject:@"3" forKey:@"source"];
+                
+                [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+                    
+                    DMMeDouRollInOutModel *model = [DMMeDouRollInOutModel mj_objectWithKeyValues:responseObj];
+                    if ([model.rescode isEqualToString:@"0000"]) {
+                        
+                        NSLog(@"------转出----支付成功----------");
+                        [weakSelf toRootViewController]; // 回到第一个视图
+                    } else {
+                        weakSelf.errorLab.text = model.resmsg;
+                    }
+                    
+                } failure:^(NSError *error) {
+                    
+                }];
+            }
+            
+        } else {
+            weakSelf.errorLab.text = model.resmsg;
+        }
+        
+    } failure:^(NSError *error) {
+        
+    }];
+}
+
+
+
+
+
+
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+
+
+@end

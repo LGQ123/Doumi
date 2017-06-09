@@ -1,0 +1,125 @@
+//
+//  MyBackIdSController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/12/26.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "MyBackIdSController.h"
+#import "BoundClipController.h"
+#import "UIImage+MostColor.h"
+//#import "BackIdsCell.h"
+#import "MyBackMode.h"
+@interface MyBackIdSController ()<UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+@property (strong, nonatomic) MyBackMode *mybackMode;
+@end
+
+@implementation MyBackIdSController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    
+    [self request_Api];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    
+    self.lable.text = @"我的银行卡";
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    _myTableView.backgroundColor = RGBA(247, 247, 247, 1);
+    self.view.backgroundColor = RGBA(247, 247, 247, 1);
+//    [_myTableView registerNib:[UINib nibWithNibName:@"BackIdsCell" bundle:nil] forCellReuseIdentifier:@"BackIdsCell"];
+}
+
+
+
+
+- (void)request_Api {
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    NSDictionary *dic = @{@"iface":@"DMHY400019",@"userId":[BusinessLogic uuid]};
+    
+    [NetworkRequest post1:serVerIP params:dic success:^(id responseObj) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        _mybackMode = [MyBackMode mj_objectWithKeyValues:responseObj];
+        if (_mybackMode.bank.length == 0) {
+            _myTableView.hidden = YES;
+           [self addItem:nitem_right btnTitleArr:@[@"加号"]];
+        } else {
+            _myTableView.hidden = NO;
+            [self addItem:nitem_right btnTitleArr:@[@"没有"]];
+            [_myTableView reloadData];
+        }
+        
+    } failure:^(NSError *error) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        
+    }];
+    
+    
+}
+
+- (void)showRightView:(UIButton *)btn {
+    BoundClipController *boundClip = [[BoundClipController alloc] init];
+    [self.navigationController pushViewController:boundClip animated:YES];
+    
+}
+
+
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 1;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 10;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+//    BackIdsCell *cell = [tableView dequeueReusableCellWithIdentifier:@"BackIdsCell"];
+//    [cell.backIcon sd_setImageWithURL:[NSURL URLWithString:_mybackMode.bankInfo] placeholderImage:nil];
+//    cell.backName.text = _mybackMode.bank;
+//    cell.backId.text = _mybackMode.bankCard;
+//    UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:_mybackMode.bankInfo]]];
+//    cell.contentView.backgroundColor = [UIImage mostColor:image];
+//    return cell;
+    return [[UITableViewCell alloc] init];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+@end

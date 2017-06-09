@@ -1,0 +1,72 @@
+//
+//  DynamicListMode.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/17.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DynamicListMode.h"
+
+@implementation DynamicListMode
+
+
++ (NSDictionary *)mj_replacedKeyFromPropertyName {
+    return@{@"Id": @"id"};
+}
+
++ (NSDictionary *)objectClassInArray{
+    return @{@"effectResults" : [Results class], @"results" : [Results class], @"notConcernedAnchors" : [Notconcernedanchors class],@"talkList":[TalkListFound class]};
+}
+@end
+@implementation Effectresults
+
++ (NSDictionary *)objectClassInArray{
+    return @{@"comments" : [Comments class]};
+}
++ (NSDictionary *)mj_replacedKeyFromPropertyName {
+    return@{@"Id": @"id"};
+}
+
+@end
+
+
+@implementation Comments
++ (NSDictionary *)mj_replacedKeyFromPropertyName {
+    return@{@"Id": @"id"};
+}
+@end
+
+
+@implementation Results
+
++ (NSDictionary *)objectClassInArray{
+    return @{@"comments" : [Comments class]};
+}
++ (NSDictionary *)mj_replacedKeyFromPropertyName {
+    return@{@"Id": @"id"};
+}
+
+@end
+
+
+
+@implementation Notconcernedanchors
+
++ (NSDictionary *)mj_replacedKeyFromPropertyName {
+    return@{@"Id": @"id"};
+}
+
+@end
+
+@implementation replyInfo
+
+@end
+
+@implementation TalkListFound
+
+@end
+
+@implementation TalkDetail
+
+@end

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="FSCollectionCell" id="gTV-IL-0wX" customClass="FSCollectionCell">
+            <rect key="frame" x="0.0" y="0.0" width="97" height="110"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="97" height="110"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="b28-vt-VGH">
+                        <rect key="frame" x="36" y="5" width="25" height="20"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="20" id="AcA-UO-hBE"/>
+                            <constraint firstAttribute="width" constant="25" id="PQj-Ut-ygE"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SO6-xY-UXb">
+                        <rect key="frame" x="0.0" y="83" width="97" height="11"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="11" id="uEF-v1-wAa"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                        <color key="textColor" red="0.15684366226196289" green="0.15687647461891174" blue="0.15683674812316895" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ask" translatesAutoresizingMaskIntoConstraints="NO" id="keZ-Vz-ZHX">
+                        <rect key="frame" x="18" y="20" width="60" height="60"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="60" id="YqF-2R-OKU"/>
+                            <constraint firstAttribute="height" constant="60" id="bqm-S7-kWG"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="layer.cornerRadius" value="30"/>
+                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                        </userDefinedRuntimeAttributes>
+                    </imageView>
+                </subviews>
+            </view>
+            <constraints>
+                <constraint firstItem="SO6-xY-UXb" firstAttribute="top" secondItem="keZ-Vz-ZHX" secondAttribute="bottom" constant="3" id="FB8-TA-vSP"/>
+                <constraint firstItem="keZ-Vz-ZHX" firstAttribute="centerX" secondItem="gTV-IL-0wX" secondAttribute="centerX" id="N1L-19-h2K"/>
+                <constraint firstItem="SO6-xY-UXb" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="WiA-Er-bQX"/>
+                <constraint firstItem="b28-vt-VGH" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="5" id="WkR-U3-chs"/>
+                <constraint firstItem="b28-vt-VGH" firstAttribute="centerX" secondItem="gTV-IL-0wX" secondAttribute="centerX" id="jsC-3u-8b4"/>
+                <constraint firstItem="keZ-Vz-ZHX" firstAttribute="top" secondItem="b28-vt-VGH" secondAttribute="bottom" constant="-5" id="kNG-Ev-MfQ"/>
+                <constraint firstAttribute="trailing" secondItem="SO6-xY-UXb" secondAttribute="trailing" id="uWS-ac-noV"/>
+            </constraints>
+            <size key="customSize" width="97" height="110"/>
+            <connections>
+                <outlet property="guanIamge" destination="b28-vt-VGH" id="r7Z-9u-4Io"/>
+                <outlet property="icimage" destination="keZ-Vz-ZHX" id="kr7-mD-jFN"/>
+                <outlet property="nameLable" destination="SO6-xY-UXb" id="8CC-zK-mcz"/>
+            </connections>
+            <point key="canvasLocation" x="57.5" y="88"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ask" width="30" height="30"/>
+    </resources>
+</document>

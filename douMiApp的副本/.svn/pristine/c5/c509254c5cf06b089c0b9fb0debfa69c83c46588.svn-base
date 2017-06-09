@@ -1,0 +1,371 @@
+//
+//  DTRewardViewController.m
+//  douMiApp
+//
+//  Created by edz on 2016/12/26.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DTRewardViewController.h"
+#import <Masonry/Masonry.h>
+#import "MEHomeMode.h"
+#import "DMPayForGeneralModel.h"
+#import "DMPayForManager.h"
+#import "DTRewardTicketViewController.h"
+#import "SafetyMode.h"
+#import "ForgetLoginController.h"
+#import "DMRewardTicketListModel.h"
+
+
+#define closeBtnWH 16
+#define bgViewW 291
+#define bgViewH 401
+
+@interface DTRewardViewController ()
+
+@property (nonatomic, strong) UILabel *defaultLabel;
+@property (nonatomic, strong) UITextView *inputTextView;
+@property (nonatomic, strong) UIButton *rewardBtn;
+@property (nonatomic, strong) UITextField *numTextField;
+@property (nonatomic, strong) UIButton *ticketBtn;
+@property (nonatomic, strong) NSString *veId; // 打赏券
+@property (nonatomic, strong) NSString *ticketAmount; // 打赏券金额
+
+
+@property (nonatomic, strong) DMPayForManager *manager;
+
+@end
+
+@implementation DTRewardViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    self.navigationController.navigationBar.hidden = YES;
+    self.navigationItem.hidesBackButton = YES;
+}
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.view.backgroundColor = RGBA(247, 247, 247, 1);
+    
+    UIButton *closeBtn = [[UIButton alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-14-closeBtnWH, 36, closeBtnWH, closeBtnWH)];
+    [closeBtn setImage:[UIImage imageNamed:@"close"] forState:UIControlStateNormal];
+    [closeBtn setEnlargeEdgeWithTop:10 right:10 bottom:10 left:10];
+    [closeBtn addTarget:self action:@selector(closeBtnClick) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:closeBtn];
+    
+    [self loadContentView];
+    
+    if (!_manager) {
+        _manager = [[DMPayForManager alloc] initWithTarget:self];
+    }
+}
+
+
+- (void)loadContentView {
+    UIView *bgView = [[UIView alloc] init];
+    bgView.backgroundColor = RGBA(255, 42, 80, 1);
+    [self.view addSubview:bgView];
+    [bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(bgViewW, bgViewH));
+        make.centerX.mas_equalTo(self.view);
+        make.top.mas_equalTo((SCREEN_HEIGHT-bgViewH)/2.5);
+    }];
+    
+    UIImageView *topBgImageView = [[UIImageView alloc] init];
+    topBgImageView.backgroundColor = [UIColor clearColor];
+    topBgImageView.image = [UIImage imageNamed:@"RedBao"];
+    [bgView addSubview:topBgImageView];
+    [topBgImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(bgViewW, 170));
+        make.left.top.mas_equalTo(0);
+    }];
+    
+    UILabel *title = [[UILabel alloc] init];
+    title.backgroundColor = [UIColor clearColor];
+    title.text = @"请输入打赏金额";
+    title.font = DMFont(10);
+    title.textAlignment = NSTextAlignmentCenter;
+    title.textColor = RGBA(255, 255, 255, 1);
+    [bgView addSubview:title];
+    [title mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(72, 12));
+        make.top.mas_equalTo(26);
+        make.centerX.mas_equalTo(bgView.mas_centerX);
+    }];
+    
+    _numTextField = [[UITextField alloc] init];
+    _numTextField.backgroundColor = [UIColor clearColor];
+    _numTextField.delegate = self;
+    _numTextField.keyboardType = UIKeyboardTypeDecimalPad;
+    _numTextField.textAlignment = NSTextAlignmentCenter;
+    _numTextField.textColor = RGBA(255, 180, 0, 1);
+    _numTextField.font = DMFont(20);
+    _numTextField.placeholder = @"￥ 00.00";
+    [_numTextField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
+    [bgView addSubview:_numTextField];
+    [_numTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(201, 41));
+        make.top.mas_equalTo(60);
+        make.centerX.mas_equalTo(bgView.mas_centerX);
+    }];
+    
+    UIImageView *textFieldImage = [[UIImageView alloc] init];
+    textFieldImage.backgroundColor = [UIColor clearColor];
+    textFieldImage.image = [UIImage imageNamed:@"1111111"];
+    [_numTextField addSubview:textFieldImage];
+    [textFieldImage mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(231, 65));
+        make.centerX.mas_equalTo(_numTextField.mas_centerX);
+        make.top.mas_equalTo(_numTextField.mas_top).offset(-12);
+    }];
+    
+    _ticketBtn = [[UIButton alloc] init];
+    _ticketBtn.backgroundColor = [UIColor clearColor];
+    _ticketBtn.titleLabel.font = DMFont(12);
+    [_ticketBtn setTitle:@"用打赏券打赏" forState:UIControlStateNormal];
+    [_ticketBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_ticketBtn addTarget:self action:@selector(ticketButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    [bgView addSubview:_ticketBtn];
+    [_ticketBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(75, 15));
+        make.top.mas_equalTo(124);
+        make.centerX.mas_equalTo(bgView.mas_centerX);
+    }];
+    
+    UIImageView *arrowImage = [[UIImageView alloc] init];
+    arrowImage.backgroundColor = [UIColor clearColor];
+    arrowImage.image = [UIImage imageNamed:@"right2"];
+    [bgView addSubview:arrowImage];
+    [arrowImage mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(9, 15));
+        make.left.mas_equalTo(_ticketBtn.mas_right);
+        make.top.mas_equalTo(_ticketBtn.mas_top);
+    }];
+    
+    _inputTextView = [[UITextView alloc] init];
+    _inputTextView.backgroundColor = [UIColor clearColor];
+    _inputTextView.delegate = self;
+    _inputTextView.textColor = [UIColor whiteColor];
+    _inputTextView.layer.borderWidth = 1;
+    _inputTextView.layer.borderColor = [UIColor whiteColor].CGColor;
+    _inputTextView.layer.cornerRadius = 5;
+    [bgView addSubview:_inputTextView];
+    [_inputTextView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(201, 101));
+        make.centerX.mas_equalTo(bgView.mas_centerX);
+        make.top.mas_equalTo(204);
+    }];
+    
+    _defaultLabel = [[UILabel alloc] init];
+    _defaultLabel.backgroundColor = [UIColor clearColor];
+    _defaultLabel.text = @"我对主播说~~";
+    _defaultLabel.textColor = RGBA(255, 255, 255, 1);
+    _defaultLabel.font = DMFont(12);
+    [_inputTextView addSubview:_defaultLabel];
+    [_defaultLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(80, 14));
+        make.left.mas_equalTo(5);
+        make.top.mas_equalTo(7);
+    }];
+    
+    _rewardBtn = [[UIButton alloc] init];
+    _rewardBtn.backgroundColor = RGBA(255, 180, 0, 1);
+    _rewardBtn.layer.cornerRadius = 5;
+    _rewardBtn.titleLabel.font = DMFont(12);
+    _rewardBtn.userInteractionEnabled = NO;
+    [_rewardBtn setTitle:@"打赏" forState:UIControlStateNormal];
+    [_rewardBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_rewardBtn addTarget:self action:@selector(rewardBtnClick) forControlEvents:UIControlEventTouchUpInside];
+    [bgView addSubview:_rewardBtn];
+    [_rewardBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(201, 41));
+        make.centerX.mas_equalTo(bgView.mas_centerX);
+        make.bottom.mas_equalTo(-36);
+    }];
+}
+
+
+- (void)rewardBtnClick {
+    if (isEmpty(_inputTextView.text)) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"温馨提示" message:@"请填写打赏评论" delegate:self cancelButtonTitle:nil otherButtonTitles:@"确定", nil];
+        [alert show];
+        return;
+    }
+    
+    [_rewardBtn setTitle:@"打赏中..." forState:UIControlStateNormal];
+    _rewardBtn.userInteractionEnabled = NO;
+    
+    __weak __typeof(self) weakSelf = self;
+
+    NSMutableDictionary *safeDic = [[NSMutableDictionary alloc] init];
+    [safeDic dm_setObject:@"DMHY400047" forKey:@"iface"];
+    [safeDic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+    [NetworkRequest post:serVerIP params:safeDic success:^(id responseObj) { // 查看用户是否设置了交易密码
+        [_rewardBtn setTitle:@"打赏" forState:UIControlStateNormal];
+        _rewardBtn.userInteractionEnabled = YES;
+
+        SafetyMode *model = [SafetyMode mj_objectWithKeyValues:responseObj];
+        if ([model.rescode isEqualToString:@"0000"]) {
+            if ([model.payPwd isEqualToString:@"未设置"]) {
+                
+                ForgetLoginController *forgetLogin = [[ForgetLoginController alloc] initWithNibName:@"ForgetLoginController" bundle:nil];
+                forgetLogin.type = @"30";
+                forgetLogin.phone = [BusinessLogic getPhoneNo];
+//                [self.navigationController pushViewController:forgetLogin animated:YES];
+                [weakSelf presentViewController:forgetLogin animated:YES completion:nil];
+                
+            } else {
+    
+                [_rewardBtn setTitle:@"打赏中..." forState:UIControlStateNormal];
+                _rewardBtn.userInteractionEnabled = NO;
+
+                NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+                [dic dm_setObject:@"DMHY400023" forKey:@"iface"];
+                [dic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+                [NetworkRequest post:serVerIP params:dic success:^(id responseObj) { // 查询余额
+                    [_rewardBtn setTitle:@"打赏" forState:UIControlStateNormal];
+                    _rewardBtn.userInteractionEnabled = YES;
+
+                    DMPayForGeneralModel *model = [DMPayForGeneralModel mj_objectWithKeyValues:responseObj];
+                    if ([model.rescode isEqualToString:@"0000"]) {
+                        [weakSelf.rewardBtn setTitle:@"打赏" forState:UIControlStateNormal];
+                        weakSelf.rewardBtn.userInteractionEnabled = YES;
+                        [weakSelf loadPayForViewWithBalance:model.usalbeAmount andVeId:_veId andTicketAmount:_ticketAmount]; // balance：余额 isTicket:是否是使用打赏券打赏  ticketAmount:打赏券金额
+                    }
+                    
+                } failure:^(NSError *error) {
+                    
+                }];
+                
+            }
+        }
+
+    } failure:^(NSError *error) {
+        
+    }];
+
+ 
+}
+
+
+- (void)loadPayForViewWithBalance:(NSString *)balance andVeId:(NSString *)veId andTicketAmount:(NSString *)ticketAmount {
+    
+    [_manager loadPayForViewWithBalance:balance andTitle:_numTextField.text andVeId:veId andAnchorId:_anchorId andDynId:_dynId andChannel:_channel andRewardText:_inputTextView.text andTicketAmount:_ticketAmount];
+    
+}
+
+
+- (void)ticketButtonClick {
+    
+    __weak __typeof(self) weakSelf = self;
+
+    NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+    [dic dm_setObject:@"DMHY400049" forKey:@"iface"];
+    [dic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+    [dic dm_setObject:@"3" forKey:@"type"];
+    
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        
+        DMRewardTicketListModel *model = [DMRewardTicketListModel mj_objectWithKeyValues:responseObj];
+        if ([model.rescode isEqualToString:@"0000"]) {
+            
+            DTRewardTicketViewController *controller = [[DTRewardTicketViewController alloc] initWithTicketArray:model.voucherExchangeList];
+            controller.ticketBlock = ^(NSString *ticketId, NSString *ticketAmount, NSString *ticketName) {
+                NSLog(@"---------name=%@", ticketName);
+                NSLog(@"---------id = %@", ticketId);
+                NSLog(@"---------amount=%@", ticketAmount);
+                
+                if (!isEmpty(ticketName)) {
+                    [weakSelf.ticketBtn setTitle:[NSString stringWithFormat:@"%@元%@", ticketAmount, ticketName] forState:UIControlStateNormal];
+                    weakSelf.veId = ticketId;
+                    weakSelf.ticketAmount = ticketAmount;
+                } else {
+                    [weakSelf.ticketBtn setTitle:@"用打赏券打赏" forState:UIControlStateNormal];
+//                    weakSelf.veId = ticketId;
+                }
+            };
+            
+            [weakSelf presentViewController:controller animated:YES completion:nil];
+            
+        }
+        
+    } failure:^(NSError *error) {
+        
+    }];
+    
+    
+
+}
+
+
+- (void)closeBtnClick {
+    [self dismissViewControllerAnimated:YES completion:nil];
+//    [self.navigationController popViewControllerAnimated:YES];
+}
+
+
+- (void)textFieldDidChange:(UITextField *)textField
+{
+    if (textField.text.length > 30) {
+        textField.text = [textField.text substringToIndex:30];
+    }
+    
+    if (textField.text.length > 0) {
+        _rewardBtn.userInteractionEnabled = YES;
+    } else {
+        _rewardBtn.userInteractionEnabled = NO;
+    }
+}
+
+
+
+#pragma mark UITextViewDelegate
+- (void)textViewDidChange:(UITextView *)textView
+{
+    [_defaultLabel setHidden:_inputTextView.text.length > 0 ? YES: NO];
+ 
+    if (textView.text.length > 200) {
+        textView.text = [textView.text substringToIndex:200];
+    }
+}
+
+
+#pragma mark UITextFieldDelegate
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    if (string.length == 0) {
+        return YES;
+    }
+    NSString *checkStr = [textField.text stringByReplacingCharactersInRange:range withString:string];
+    //正则表达式
+    NSString *regex = @"^\\-?([1-9]\\d*|0)(\\.\\d{0,2})?$";
+    return [self isValid:checkStr withRegex:regex];
+}
+
+
+- (BOOL) isValid:(NSString*)checkStr withRegex:(NSString*)regex
+{
+    NSPredicate *predicte = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",regex];
+    return [predicte evaluateWithObject:checkStr];
+}
+
+
+#pragma mark UIAlertViewDelegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+//    if (buttonIndex == ) {
+//        <#statements#>
+//    }
+}
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+
+@end

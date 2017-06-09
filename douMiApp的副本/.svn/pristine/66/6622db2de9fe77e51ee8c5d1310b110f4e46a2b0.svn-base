@@ -1,0 +1,556 @@
+//
+//  ZYKMD5.m
+//  加密算法
+//
+//  Created by 赵英奎 on 14-4-26.
+//  Copyright (c) 2014年 张诚. All rights reserved.
+//
+
+#import "ZYKMD5.h"
+
+#import <CommonCrypto/CommonDigest.h>
+#import <CommonCrypto/CommonCryptor.h>
+#import <Security/Security.h>
+#import "GTMBase64.h"
+//空字符串
+#define     LocalStr_None           @""
+//密匙 key
+#define gkey            @"_DMHY&app@3Des$Key%[28]!"
+//偏移量
+#define gIv             @"20100819"
+static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+@implementation ZYKMD5
+//支持双加密方式
+//32位MD5加密方式
++ (NSString *)getMd5_32Bit_String:(NSString *)srcString isUppercase:(BOOL)isUppercase{
+    const char *cStr = [srcString UTF8String];
+    unsigned char digest[CC_MD5_DIGEST_LENGTH];
+    CC_MD5( cStr, strlen(cStr), digest );
+    NSMutableString *result = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
+    for(int i = 0; i < CC_MD5_DIGEST_LENGTH; i++)
+        [result appendFormat:@"%02x", digest[i]];
+    
+    if (isUppercase) {
+        return   [result uppercaseString];
+    }else{
+        return result;
+    }
+    
+}
+//16位MD5加密方式
++ (NSString *)getMd5_16Bit_String:(NSString *)srcString isUppercase:(BOOL)isUppercase{
+    //提取32位MD5散列的中间16位
+    NSString *md5_32Bit_String=[self getMd5_32Bit_String:srcString isUppercase:NO];
+    NSString *result = [[md5_32Bit_String substringToIndex:24] substringFromIndex:8];//即9～25位
+    
+    if (isUppercase) {
+        return   [result uppercaseString];
+    }else{
+        return result;
+    }
+    
+}
+//sha1加密方式
++ (NSString *)getSha1String:(NSString *)srcString{
+    const char *cstr = [srcString cStringUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = [NSData dataWithBytes:cstr length:srcString.length];
+    
+    uint8_t digest[CC_SHA1_DIGEST_LENGTH];
+    
+    CC_SHA1(data.bytes, data.length, digest);
+    
+    NSMutableString* result = [NSMutableString stringWithCapacity:CC_SHA1_DIGEST_LENGTH * 2];
+    
+    for(int i = 0; i < CC_SHA1_DIGEST_LENGTH; i++) {
+        [result appendFormat:@"%02x", digest[i]];
+    }
+    
+    return result;
+}
+//sha256加密方式
++ (NSString *)getSha256String:(NSString *)srcString {
+    const char *cstr = [srcString cStringUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = [NSData dataWithBytes:cstr length:srcString.length];
+    
+    uint8_t digest[CC_SHA256_DIGEST_LENGTH];
+    
+    CC_SHA1(data.bytes, data.length, digest);
+    
+    NSMutableString* result = [NSMutableString stringWithCapacity:CC_SHA256_DIGEST_LENGTH * 2];
+    
+    for(int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
+        [result appendFormat:@"%02x", digest[i]];
+    }
+    
+    return result;
+}
+//sha384加密方式
++ (NSString *)getSha384String:(NSString *)srcString {
+    const char *cstr = [srcString cStringUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = [NSData dataWithBytes:cstr length:srcString.length];
+    
+    uint8_t digest[CC_SHA384_DIGEST_LENGTH];
+    
+    CC_SHA1(data.bytes, data.length, digest);
+    
+    NSMutableString* result = [NSMutableString stringWithCapacity:CC_SHA384_DIGEST_LENGTH * 2];
+    
+    for(int i = 0; i < CC_SHA384_DIGEST_LENGTH; i++) {
+        [result appendFormat:@"%02x", digest[i]];
+    }
+    
+    return result;
+}
+
+//sha512加密方式
++ (NSString*) getSha512String:(NSString*)srcString {
+    const char *cstr = [srcString cStringUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = [NSData dataWithBytes:cstr length:srcString.length];
+    uint8_t digest[CC_SHA512_DIGEST_LENGTH];
+    
+    CC_SHA512(data.bytes, data.length, digest);
+    
+    NSMutableString* result = [NSMutableString stringWithCapacity:CC_SHA512_DIGEST_LENGTH * 2];
+    for(int i = 0; i < CC_SHA512_DIGEST_LENGTH; i++)
+        [result appendFormat:@"%02x", digest[i]];
+    return result;
+}
+
+
+//字符串
++(NSString *)doEncryptStr:(NSString *)originalStr{
+    
+    //把string 转NSData
+    NSData* data = [originalStr dataUsingEncoding:NSUTF8StringEncoding];
+    
+    //length
+    size_t plainTextBufferSize = [data length];
+    
+    const void *vplainText = (const void *)[data bytes];
+    
+    CCCryptorStatus ccStatus;
+    uint8_t *bufferPtr = NULL;
+    size_t bufferPtrSize = 0;
+    size_t movedBytes = 0;
+    
+    bufferPtrSize = (plainTextBufferSize + kCCBlockSize3DES) & ~(kCCBlockSize3DES - 1);
+    bufferPtr = malloc( bufferPtrSize * sizeof(uint8_t));
+    memset((void *)bufferPtr, 0x0, bufferPtrSize);
+    
+    const void *vkey = (const void *) [gkey UTF8String];
+    //偏移量
+    const void *vinitVec = (const void *) [gIv UTF8String];
+    
+    //配置CCCrypt
+    ccStatus = CCCrypt(kCCEncrypt,
+                       kCCAlgorithm3DES, //3DES
+                       kCCOptionPKCS7Padding, //设置模式
+                       vkey,    //key
+                       kCCKeySize3DES,
+                       vinitVec,     //偏移量，这里不用，设置为nil;不用的话，必须为nil,不可以为@“”
+                       vplainText,
+                       plainTextBufferSize,
+                       (void *)bufferPtr,
+                       bufferPtrSize,
+                       &movedBytes);
+    
+    NSData *myData = [NSData dataWithBytes:(const void *)bufferPtr length:(NSUInteger)movedBytes];
+    NSString *result = [GTMBase64 stringByEncodingData:myData];
+    return result;
+}
+
+
+
++(NSString*)doDecEncryptStr:(NSString *)encryptStr{
+    
+    NSData *encryptData = [GTMBase64 decodeData:[encryptStr dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    size_t plainTextBufferSize = [encryptData length];
+    const void *vplainText = [encryptData bytes];
+    
+    CCCryptorStatus ccStatus;
+    uint8_t *bufferPtr = NULL;
+    size_t bufferPtrSize = 0;
+    size_t movedBytes = 0;
+    
+    bufferPtrSize = (plainTextBufferSize + kCCBlockSize3DES) & ~(kCCBlockSize3DES - 1);
+    bufferPtr = malloc( bufferPtrSize * sizeof(uint8_t));
+    memset((void *)bufferPtr, 0x0, bufferPtrSize);
+    
+    const void *vkey = (const void *) [gkey UTF8String];
+    
+    const void *vinitVec = (const void *) [gIv UTF8String];
+    
+    ccStatus = CCCrypt(kCCDecrypt,
+                       kCCAlgorithm3DES,
+                       kCCOptionPKCS7Padding,
+                       vkey,
+                       kCCKeySize3DES,
+                       vinitVec,
+                       vplainText,
+                       plainTextBufferSize,
+                       (void *)bufferPtr,
+                       bufferPtrSize,
+                       &movedBytes);
+    
+    NSString *result = [[NSString alloc] initWithData:[NSData dataWithBytes:(const void *)bufferPtr
+                                                                     length:(NSUInteger)movedBytes] encoding:NSUTF8StringEncoding];
+    
+    
+    return result;
+}
+
+
+
+
+//十六进制
++(NSString *)doEncryptHex:(NSString *)originalStr{
+    
+    //把string 转NSData
+    NSData* data = [originalStr dataUsingEncoding:NSUTF8StringEncoding];
+    
+    //length
+    size_t plainTextBufferSize = [data length];
+    
+    const void *vplainText = (const void *)[data bytes];
+    
+    CCCryptorStatus ccStatus;
+    uint8_t *bufferPtr = NULL;
+    size_t bufferPtrSize = 0;
+    size_t movedBytes = 0;
+    
+    bufferPtrSize = (plainTextBufferSize + kCCBlockSize3DES) & ~(kCCBlockSize3DES - 1);
+    bufferPtr = malloc( bufferPtrSize * sizeof(uint8_t));
+    memset((void *)bufferPtr, 0x0, bufferPtrSize);
+    
+    const void *vkey = (const void *) [gkey UTF8String];
+    //偏移量
+    const void *vinitVec = (const void *) [gIv UTF8String];
+    
+    //配置CCCrypt
+    ccStatus = CCCrypt(kCCEncrypt,
+                       kCCAlgorithm3DES, //3DES
+                       kCCOptionECBMode|kCCOptionPKCS7Padding, //设置模式
+                       vkey,    //key
+                       kCCKeySize3DES,
+                       vinitVec,     //偏移量，这里不用，设置为nil;不用的话，必须为nil,不可以为@“”
+                       vplainText,
+                       plainTextBufferSize,
+                       (void *)bufferPtr,
+                       bufferPtrSize,
+                       &movedBytes);
+    
+    NSData *myData = [NSData dataWithBytes:(const char *)bufferPtr length:(NSUInteger)movedBytes];
+    
+    NSUInteger          len = [myData length];
+    char *              chars = (char *)[myData bytes];
+    NSMutableString *   hexString = [[NSMutableString alloc] init];
+    
+    for(NSUInteger i = 0; i < len; i++ )
+        [hexString appendString:[NSString stringWithFormat:@"%0.2hhx", chars[i]]];
+    
+    return hexString;
+    
+}
+
+
+
++(NSString*)doDecEncryptHex:(NSString *)encryptStr{
+    
+    //十六进制转NSData
+    long len = [encryptStr length] / 2;
+    unsigned char *buf = malloc(len);
+    unsigned char *whole_byte = buf;
+    char byte_chars[3] = {'\0','\0','\0'};
+    
+    int i;
+    for (i=0; i < [encryptStr length] / 2; i++) {
+        byte_chars[0] = [encryptStr characterAtIndex:i*2];
+        byte_chars[1] = [encryptStr characterAtIndex:i*2+1];
+        *whole_byte = strtol(byte_chars, NULL, 16);
+        whole_byte++;
+    }
+    
+    NSData *encryptData = [NSData dataWithBytes:buf length:len];
+    
+    size_t plainTextBufferSize = [encryptData length];
+    const void *vplainText = [encryptData bytes];
+    
+    CCCryptorStatus ccStatus;
+    uint8_t *bufferPtr = NULL;
+    size_t bufferPtrSize = 0;
+    size_t movedBytes = 0;
+    
+    bufferPtrSize = (plainTextBufferSize + kCCBlockSize3DES) & ~(kCCBlockSize3DES - 1);
+    bufferPtr = malloc( bufferPtrSize * sizeof(uint8_t));
+    memset((void *)bufferPtr, 0x0, bufferPtrSize);
+    
+    const void *vkey = (const void *) [gkey UTF8String];
+    
+    const void *vinitVec = (const void *) [gIv UTF8String];
+    
+    ccStatus = CCCrypt(kCCDecrypt,
+                       kCCAlgorithm3DES,
+                       kCCOptionPKCS7Padding|kCCOptionECBMode,
+                       vkey,
+                       kCCKeySize3DES,
+                       vinitVec,
+                       vplainText,
+                       plainTextBufferSize,
+                       (void *)bufferPtr,
+                       bufferPtrSize,
+                       &movedBytes);
+    
+    NSString *result = [[NSString alloc] initWithData:[NSData dataWithBytes:(const void *)bufferPtr
+                                                                     length:(NSUInteger)movedBytes] encoding:NSUTF8StringEncoding];
+    
+    
+    return result;
+}
+
+
+
+
+
++ (NSString *)base64StringFromText:(NSString *)text
+{
+    if (text && ![text isEqualToString:LocalStr_None]) {
+        //取项目的bundleIdentifier作为KEY  改动了此处
+        //NSString *key = [[NSBundle mainBundle] bundleIdentifier];
+        NSData *data = [text dataUsingEncoding:NSUTF8StringEncoding];
+        //IOS 自带DES加密 Begin  改动了此处
+        //data = [self DESEncrypt:data WithKey:key];
+        //IOS 自带DES加密 End
+        return [self base64EncodedStringFrom:data];
+    }
+    else {
+        return LocalStr_None;
+    }
+}
+
++ (NSString *)textFromBase64String:(NSString *)base64
+{
+    if (base64 && ![base64 isEqualToString:LocalStr_None]) {
+        //取项目的bundleIdentifier作为KEY   改动了此处
+        //NSString *key = [[NSBundle mainBundle] bundleIdentifier];
+        NSData *data = [self dataWithBase64EncodedString:base64];
+        //IOS 自带DES解密 Begin    改动了此处
+        //data = [self DESDecrypt:data WithKey:key];
+        //IOS 自带DES加密 End
+        return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    }
+    else {
+        return LocalStr_None;
+    }
+}
+
+
+/******************************************************************************
+ 函数名称 : + (NSData *)dataWithBase64EncodedString:(NSString *)string
+ 函数描述 : base64格式字符串转换为文本数据
+ 输入参数 : (NSString *)string
+ 输出参数 : N/A
+ 返回参数 : (NSData *)
+ 备注信息 :
+ ******************************************************************************/
++ (NSData *)dataWithBase64EncodedString:(NSString *)string
+{
+    if (string == nil)
+        [NSException raise:NSInvalidArgumentException format:nil];
+    if ([string length] == 0)
+        return [NSData data];
+    
+    static char *decodingTable = NULL;
+    if (decodingTable == NULL)
+    {
+        decodingTable = malloc(256);
+        if (decodingTable == NULL)
+            return nil;
+        memset(decodingTable, CHAR_MAX, 256);
+        NSUInteger i;
+        for (i = 0; i < 64; i++)
+            decodingTable[(short)encodingTable[i]] = i;
+    }
+    
+    const char *characters = [string cStringUsingEncoding:NSASCIIStringEncoding];
+    if (characters == NULL)     //  Not an ASCII string!
+        return nil;
+    char *bytes = malloc((([string length] + 3) / 4) * 3);
+    if (bytes == NULL)
+        return nil;
+    NSUInteger length = 0;
+    
+    NSUInteger i = 0;
+    while (YES)
+    {
+        char buffer[4];
+        short bufferLength;
+        for (bufferLength = 0; bufferLength < 4; i++)
+        {
+            if (characters[i] == '\0')
+                break;
+            if (isspace(characters[i]) || characters[i] == '=')
+                continue;
+            buffer[bufferLength] = decodingTable[(short)characters[i]];
+            if (buffer[bufferLength++] == CHAR_MAX)      //  Illegal character!
+            {
+                free(bytes);
+                return nil;
+            }
+        }
+        
+        if (bufferLength == 0)
+            break;
+        if (bufferLength == 1)      //  At least two characters are needed to produce one byte!
+        {
+            free(bytes);
+            return nil;
+        }
+        
+        //  Decode the characters in the buffer to bytes.
+        bytes[length++] = (buffer[0] << 2) | (buffer[1] >> 4);
+        if (bufferLength > 2)
+            bytes[length++] = (buffer[1] << 4) | (buffer[2] >> 2);
+        if (bufferLength > 3)
+            bytes[length++] = (buffer[2] << 6) | buffer[3];
+    }
+    
+    bytes = realloc(bytes, length);
+    return [NSData dataWithBytesNoCopy:bytes length:length];
+}
+
+/******************************************************************************
+ 函数名称 : + (NSString *)base64EncodedStringFrom:(NSData *)data
+ 函数描述 : 文本数据转换为base64格式字符串
+ 输入参数 : (NSData *)data
+ 输出参数 : N/A
+ 返回参数 : (NSString *)
+ 备注信息 :
+ ******************************************************************************/
++ (NSString *)base64EncodedStringFrom:(NSData *)data
+{
+    if ([data length] == 0)
+        return @"";
+    
+    char *characters = malloc((([data length] + 2) / 3) * 4);
+    if (characters == NULL)
+        return nil;
+    NSUInteger length = 0;
+    
+    NSUInteger i = 0;
+    while (i < [data length])
+    {
+        char buffer[3] = {0,0,0};
+        short bufferLength = 0;
+        while (bufferLength < 3 && i < [data length])
+            buffer[bufferLength++] = ((char *)[data bytes])[i++];
+        
+        //  Encode the bytes in the buffer to four characters, including padding "=" characters if necessary.
+        characters[length++] = encodingTable[(buffer[0] & 0xFC) >> 2];
+        characters[length++] = encodingTable[((buffer[0] & 0x03) << 4) | ((buffer[1] & 0xF0) >> 4)];
+        if (bufferLength > 1)
+            characters[length++] = encodingTable[((buffer[1] & 0x0F) << 2) | ((buffer[2] & 0xC0) >> 6)];
+        else characters[length++] = '=';
+        if (bufferLength > 2)
+            characters[length++] = encodingTable[buffer[2] & 0x3F];
+        else characters[length++] = '=';
+    }
+    
+    return [[NSString alloc] initWithBytesNoCopy:characters length:length encoding:NSASCIIStringEncoding freeWhenDone:YES];
+}
+
+
+//支付通RSA加密
+
++(SecKeyRef)getRSAPublicKey{
+    NSString *certPath = [[NSBundle mainBundle] pathForResource:@"public_key" ofType:@"der"];
+    SecCertificateRef myCertificate = nil;
+    NSData *certificateData = [[NSData alloc] initWithContentsOfFile:certPath];
+    NSLog(@"certificateData=%@",certificateData);
+    myCertificate = SecCertificateCreateWithData(kCFAllocatorDefault, (CFDataRef)certificateData);
+    SecPolicyRef myPolicy = SecPolicyCreateBasicX509();
+    SecTrustRef myTrust;
+    OSStatus status = SecTrustCreateWithCertificates(myCertificate,myPolicy,&myTrust);
+    SecTrustResultType trustResult;
+    if (status == noErr) {
+        status = SecTrustEvaluate(myTrust, &trustResult);
+    }
+    return SecTrustCopyPublicKey(myTrust);
+}
+
+
++ (NSString *)RSAEncrypotoTheData:(NSString *)plainText
+{
+    
+    SecKeyRef publicKey=nil;
+    publicKey=[self getRSAPublicKey];
+    size_t cipherBufferSize = SecKeyGetBlockSize(publicKey);
+    uint8_t *cipherBuffer = NULL;
+    
+    cipherBuffer = malloc(cipherBufferSize * sizeof(uint8_t));
+    memset((void *)cipherBuffer, 0*0, cipherBufferSize);
+    
+    NSData *plainTextBytes = [plainText dataUsingEncoding:NSUTF8StringEncoding];
+    int blockSize = cipherBufferSize-11;  // 这个地方比较重要是加密数组长度
+    int numBlock = (int)ceil([plainTextBytes length] / (double)blockSize);
+    NSMutableData *encryptedData = [[NSMutableData alloc] init];
+    for (int i=0; i<numBlock; i++) {
+        int bufferSize = MIN(blockSize,[plainTextBytes length]-i*blockSize);
+        NSData *buffer = [plainTextBytes subdataWithRange:NSMakeRange(i * blockSize, bufferSize)];
+        OSStatus status = SecKeyEncrypt(publicKey,
+                                        kSecPaddingPKCS1,
+                                        (const uint8_t *)[buffer bytes],
+                                        [buffer length],
+                                        cipherBuffer,
+                                        &cipherBufferSize);
+        if (status == noErr)
+        {
+            NSData *encryptedBytes = [[NSData alloc]
+                                      initWithBytes:(const void *)cipherBuffer
+                                      length:cipherBufferSize];
+            [encryptedData appendData:encryptedBytes];
+        }
+        else
+        {
+            return nil;
+        }
+    }
+    if (cipherBuffer)
+    {
+        free(cipherBuffer);
+    }
+    
+    NSLog(@"encryptedData=%@",encryptedData);
+    
+    NSString *encrypotoResult=[NSString stringWithFormat:@"%@",[encryptedData base64Encoding]];
+    
+    encrypotoResult=[self hexStringFromString:encrypotoResult];
+    
+    return encrypotoResult;
+    
+    
+}
+
+
+//普通字符串转换为十六进制的。
++(NSString *)hexStringFromString:(NSString *)string
+{
+    NSData *myD = [string dataUsingEncoding:NSUTF8StringEncoding];
+    Byte *bytes = (Byte *)[myD bytes];
+    //下面是Byte 转换为16进制。
+    NSString *hexStr=@"";
+    for(int i=0;i<[myD length];i++)
+    { NSString *newHexStr = [NSString stringWithFormat:@"%x",bytes[i]&0xff];
+        ///16进制数
+        if([newHexStr length]==1)
+            hexStr = [NSString stringWithFormat:@"%@0%@",hexStr,newHexStr];
+        else
+            hexStr = [NSString stringWithFormat:@"%@%@",hexStr,newHexStr];
+    }
+    return hexStr;
+}
+
+
+
+@end

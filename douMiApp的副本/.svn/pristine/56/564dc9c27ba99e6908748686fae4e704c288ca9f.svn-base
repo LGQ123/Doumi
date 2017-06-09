@@ -1,0 +1,98 @@
+//
+//  InteractViewController.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/23.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "InteractViewController.h"
+#import "UITableViewCell+WHC_AutoHeightForCell.h"
+#import "HTPLCell.h"
+
+@interface InteractViewController ()<UITableViewDelegate,UITableViewDataSource>
+
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+@end
+
+@implementation InteractViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    [self addItem:item_left btnTitle:nil viewTitle:@"互动"];
+    
+    [_myTableView registerClass:[HTPLCell class] forCellReuseIdentifier:@"HTPLCell"];
+    _myTableView.backgroundColor = RGBA(247, 247, 247, 1);
+    __weak __typeof(self) weakSelf = self;
+    _myTableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        [weakSelf request_Api];
+    }];
+    
+    _myTableView.mj_footer = [MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
+        [weakSelf requestMore_Api];
+    }];
+    [self request_Api];
+}
+
+- (void)request_Api {
+    
+    
+}
+
+- (void)requestMore_Api {
+    
+}
+
+
+#pragma mark- tab;eViewDelegate 
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 5;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 15;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return [HTPLCell whc_CellHeightForIndexPath:indexPath tableView:tableView];
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    HTPLCell *cell = [tableView dequeueReusableCellWithIdentifier:@"HTPLCell"];
+    return cell;
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

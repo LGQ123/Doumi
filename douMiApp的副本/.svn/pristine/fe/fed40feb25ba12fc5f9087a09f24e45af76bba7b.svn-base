@@ -1,0 +1,72 @@
+//
+//  DMDouTicketCell.m
+//  douMiApp
+//
+//  Created by edz on 2016/12/28.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "DMDouTicketCell.h"
+
+
+#define margin 10
+
+@implementation DMDouTicketCell
+
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        
+        self.backgroundColor = [UIColor clearColor];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        UIImageView *image = [[UIImageView alloc] initWithFrame:CGRectMake(margin, margin, SCREEN_WIDTH-margin*2, 141)];
+        image.backgroundColor = [UIColor lightGrayColor];
+        [self addSubview:image];
+        
+        UILabel *titleLab = [self getLabelWithFrame:CGRectMake(20, margin, SCREEN_WIDTH-160, 21) andBgcolor:[UIColor clearColor] andTitle:@"哈根达斯冰淇淋一只" andTitleColor:RGBA(40, 40, 40, 1) andFont:DMFontBold(16)];
+        [image addSubview:titleLab];
+        
+        UILabel *numLab = [self getLabelWithFrame:CGRectMake(titleLab.mj_x+titleLab.mj_w+9, titleLab.mj_y, 91, titleLab.mj_h) andBgcolor:RGBA(255, 42, 80, 1) andTitle:@"56789098" andTitleColor:[UIColor whiteColor] andFont:DMFontBold(16)];
+        numLab.textAlignment = NSTextAlignmentCenter;
+        [image addSubview:numLab];
+        
+        
+    }
+    return self;
+}
+
+
+- (void)setItemWithModel:(id)model {
+    
+}
+
+
+- (UILabel *)getLabelWithFrame:(CGRect)frame andBgcolor:(UIColor *)bgColor andTitle:(NSString *)title andTitleColor:(UIColor *)textColor andFont:(UIFont *)font {
+    UILabel *label = [[UILabel alloc] initWithFrame:frame];
+    label.backgroundColor = bgColor;
+    label.text = title;
+    label.textColor = textColor;
+    label.font = font;
+    return label;
+}
+
+
+
+
+
+
+
+
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+//    [super setSelected:selected animated:animated];
+
+}
+
+@end

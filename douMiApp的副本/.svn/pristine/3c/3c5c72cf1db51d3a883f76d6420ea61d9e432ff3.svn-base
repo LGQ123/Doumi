@@ -1,0 +1,25 @@
+//
+//  ZuiXinHFCell.m
+//  douMiApp
+//
+//  Created by ydz on 2016/11/23.
+//  Copyright © 2016年 lgq. All rights reserved.
+//
+
+#import "ZuiXinHFCell.h"
+
+@implementation ZuiXinHFCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

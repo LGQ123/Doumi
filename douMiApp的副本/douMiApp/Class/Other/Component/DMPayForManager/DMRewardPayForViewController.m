@@ -1,0 +1,95 @@
+//
+//  DMRewardPayForViewController.m
+//  douMiApp
+//
+//  Created by edz on 2017/1/5.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "DMRewardPayForViewController.h"
+#import "DMPayForGeneralModel.h"
+
+@interface DMRewardPayForViewController ()
+
+@property (nonatomic, strong) NSString *rewardMoney;
+@property (nonatomic, strong) NSString *veId;
+@property (nonatomic, strong) NSString *anchorId;
+@property (nonatomic, strong) NSString *dynId;
+@property (nonatomic, strong) NSString *channel;
+@property (nonatomic, strong) NSString *rewardText;
+
+@end
+
+@implementation DMRewardPayForViewController
+
+- (instancetype)initWithTitle:(NSString *)title andVeId:(NSString *)veId andAnchorId:(NSString *)anchorId andDynId:(NSString *)dynId andChannel:(NSString *)channel andRewardText:(NSString *)rewardText {
+    self = [super init];
+    if (self) {
+        
+        _rewardMoney = title;
+        _veId = veId;
+        _anchorId = anchorId;
+        _dynId = dynId;
+        _channel = channel;
+        _rewardText = rewardText;
+        
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+}
+
+
+- (void)requestWithPassword:(NSString *)password {
+    [super requestWithPassword:password];
+    
+    __weak __typeof(self) weakSelf = self;
+    NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+    [dic dm_setObject:@"DMHY300005" forKey:@"iface"];
+    [dic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+    [dic dm_setObject:_dynId forKey:@"dynId"];
+    [dic dm_setObject:_rewardMoney forKey:@"applyCash"];
+    [dic dm_setObject:_rewardText forKey:@"comment"];
+    [dic dm_setObject:_anchorId forKey:@"anchorId"];
+    [dic dm_setObject:password forKey:@"pwd"];
+    [dic dm_setObject:_channel forKey:@"channel"];
+    [dic dm_setObject:_veId forKey:@"veId"];
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        
+        DMPayModel *model = [DMPayModel mj_objectWithKeyValues:responseObj];
+        if ([model.rescode isEqualToString:@"0000"]) {
+            [MobClick endEvent:@"baskSuccess"];
+            
+            [LCProgressHUD showMessage:model.resmsg];
+            //            [self.presentingViewController.presentingViewController dismissViewControllerAnimated:NO completion:nil];
+            [self toRootViewController]; // 回到第一个视图
+            
+            
+        } else {
+            weakSelf.errorLab.text = model.resmsg;
+            
+            if ([model.resmsg isEqualToString:@"账户余额不足"]) {
+                
+            }
+        }
+        
+    } failure:^(NSError *error) {
+        
+    }];
+}
+
+
+
+
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+
+@end

@@ -1,0 +1,245 @@
+//
+//  RefundCell.m
+//  douMiApp
+//
+//  Created by ydz on 2017/1/11.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "RefundCell.h"
+#import "HuanKuanMode.h"
+@interface RefundCell ()
+{
+    LZNumberChangedBlock numberAddBlock;
+    LZNumberChangedBlock numberCutBlock;
+    LZCellSelectedBlock cellSelectedBlock;
+}
+@property (strong, nonatomic) UIView *addSubtractView;
+
+@property (strong, nonatomic) UIButton *addBtn;
+@property (strong, nonatomic) UIButton *subtractBtn;
+
+@property (strong, nonatomic) UILabel *title;
+@property (strong, nonatomic) UILabel *yiYu;
+@property (strong, nonatomic) UILabel *faxi;
+@property (strong, nonatomic) UILabel *weiYueJin;
+
+@end
+
+@implementation RefundCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+    
+    _chooseBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    _chooseBtn.frame = CGRectMake(0, 0, 48, 106);
+    [_chooseBtn setBackgroundImage:[UIImage imageNamed:@"蜜分期未选中"] forState:UIControlStateNormal];
+    [_chooseBtn setBackgroundImage:[UIImage imageNamed:@"蜜分期选中"] forState:UIControlStateSelected];
+    [_chooseBtn addTarget:self action:@selector(chooseBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.myScrollView addSubview:_chooseBtn];
+    
+    _title = [[UILabel alloc] initWithFrame:CGRectMake(48, 10, SCREEN_WIDTH-44-48-60, 13)];
+    _title.textColor = RGBA(39, 39, 39, 1);
+    _title.text = @"2016-10-28为小豆蔓消费借款5000.00元";
+    _title.font = [UIFont boldSystemFontOfSize:12];
+    _title.textAlignment = NSTextAlignmentLeft;
+    [self.myScrollView addSubview:_title];
+    
+    _yiYu = [[UILabel alloc] initWithFrame:CGRectMake(POINTX(_title)+WIDTH(_title), 10, 60, 13)];
+    _yiYu.textColor = RGBA(255,42,80, 1);
+    _yiYu.text = @"(已逾13期)";
+    _yiYu.font = [UIFont boldSystemFontOfSize:12];
+    _yiYu.textAlignment = NSTextAlignmentRight;
+    [self.myScrollView addSubview:_yiYu];
+    
+    UIView *lineBView =  [self createLineframe:CGRectMake(48, POINTY(_title)+HEIGTH(_title)+10, SCREEN_WIDTH-48, 1)];
+    [self.myScrollView addSubview:lineBView];
+    
+    UILabel *daiHuanLable = [self creteLableFrame:CGRectMake(48, POINTY(lineBView)+11, 55, 12) andtext:@"待还本息:" andTxColor:RGBA(40, 40, 40, 1)];
+    [self.myScrollView addSubview:daiHuanLable];
+    
+    _daiHuanBX = [self creteLableFrame:CGRectMake(48+WIDTH(daiHuanLable), POINTY(daiHuanLable), SCREEN_WIDTH-48-WIDTH(daiHuanLable), 12) andtext:@"1500*3期" andTxColor:RGBA(140, 140, 140, 1)];
+    [self.myScrollView addSubview:_daiHuanBX];
+    
+    UILabel *faXi = [self creteLableFrame:CGRectMake(48, POINTY(daiHuanLable)+HEIGTH(daiHuanLable)+10, 35, 12) andtext:@"罚息:" andTxColor:RGBA(40, 40, 40, 1)];
+    [self.myScrollView addSubview:faXi];
+    
+    _faxi = [self creteLableFrame:CGRectMake(48+WIDTH(faXi), POINTY(faXi), SCREEN_WIDTH-48-WIDTH(faXi), 12) andtext:@"350.50" andTxColor:RGBA(140, 140, 140, 1)];
+    [self.myScrollView addSubview:_faxi];
+    
+    UILabel *weiYueJin = [self creteLableFrame:CGRectMake(48, POINTY(faXi)+HEIGTH(faXi)+10, 45, 12) andtext:@"违约金:" andTxColor:RGBA(40, 40, 40, 1)];
+    [self.myScrollView addSubview:weiYueJin];
+    _weiYueJin = [self creteLableFrame:CGRectMake(48+WIDTH(weiYueJin), POINTY(weiYueJin), SCREEN_WIDTH-48-WIDTH(weiYueJin), 12) andtext:@"550.50" andTxColor:RGBA(140, 140, 140, 1)];
+    [self.myScrollView addSubview:_weiYueJin];
+    
+    
+    _addSubtractView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH, 0, 80, 106)];
+    _addSubtractView.backgroundColor = RGBA(60, 60, 60, 1);
+    [self.myScrollView addSubview:_addSubtractView];
+    self.myScrollView.contentSize = CGSizeMake(SCREEN_WIDTH+80, 0);
+    
+    _addBtn = [self createBtnframe:CGRectMake(0, 0, 80, 37) andTitle:@"+" andsel:@selector(addBtnClick:)];
+    _addBtn.selected = YES;
+    [_addSubtractView addSubview:_addBtn];
+    
+    _subtractBtn = [self createBtnframe:CGRectMake(0, 69, 80, 37) andTitle:@"-" andsel:@selector(subtractBtnClick:)];
+    [_addSubtractView addSubview:_subtractBtn];
+    
+    
+    UIView *line1 = [self createLineframe:CGRectMake(15, 37, 51, 1)];
+    [_addSubtractView addSubview:line1];
+    
+    _number = [[UILabel alloc] initWithFrame:CGRectMake(0, 43, 80, 20)];
+//    _number.center = _addSubtractView.center;
+//    _number.backgroundColor = [UIColor redColor];
+    _number.font = [UIFont systemFontOfSize:20];
+    _number.textAlignment = NSTextAlignmentCenter;
+    _number.textColor = RGBA(255, 255, 255, 1);
+//    _number.text = @"22";
+    [_addSubtractView addSubview:_number];
+    
+    UIView *line2 = [self createLineframe:CGRectMake(15, 68, 51, 1)];
+    [_addSubtractView addSubview:line2];
+
+}
+
+
+- (UIButton *)createBtnframe:(CGRect )frame andTitle:(NSString *)title andsel:(SEL)sel {
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn.frame = frame;
+    [btn setTitle:title forState:UIControlStateNormal];
+    btn.titleLabel.font = [UIFont systemFontOfSize:32];
+    [btn setTitleColor:RGBA(247, 247, 247, 1) forState:UIControlStateNormal];
+    [btn setTitleColor:RGBA(100, 100, 100, 1) forState:UIControlStateSelected];
+    [btn addTarget:self action:sel forControlEvents:UIControlEventTouchUpInside];
+    return btn;
+}
+
+- (UIView *)createLineframe:(CGRect)frame {
+    UIView *line = [[UIView alloc] initWithFrame:frame];
+    line.backgroundColor = RGBA(100, 100, 100, 0.5);
+    return line;
+
+
+}
+
+- (UILabel *)creteLableFrame:(CGRect)frame andtext:(NSString *)text andTxColor:(UIColor *)color {
+    
+    UILabel *lable = [[UILabel alloc] initWithFrame:frame];
+    lable.textColor = color;
+    lable.text = text;
+    lable.font = [UIFont systemFontOfSize:12];
+    lable.textAlignment = NSTextAlignmentLeft;
+    return lable;
+}
+
+
+- (void)setMode:(Overduerepayments *)mode {
+    
+    _mode = mode;
+   
+    if (_mode.number == 0) {
+        _mode.number = mode.overdueSize;
+    } else {
+        
+    }
+    _title.text = mode.borrowTitle;
+    _yiYu.text = [NSString stringWithFormat:@"(已逾%li期)",(long)mode.overdueSize];
+    _daiHuanBX.text = [NSString stringWithFormat:@"%.2f*%li期",mode.principalInterest,(long)_mode.number];
+    _faxi.text = [NSString stringWithFormat:@"%.2f",mode.overdueFine];
+    _weiYueJin.text = [NSString stringWithFormat:@"%.2f",mode.overdueRevenue];
+    _number.text = [NSString stringWithFormat:@"%li",(long)_mode.number];
+    
+    if (mode.number <= 1) {
+        _subtractBtn.selected = YES;
+    } else {
+        _subtractBtn.selected = NO;
+    }
+    _chooseBtn.selected = mode.select;
+    
+    if (_mode.number >= mode.overdueSize) {
+        _addBtn.selected = YES;
+    } else {
+        _addBtn.selected = NO;
+    }
+}
+
+- (void)addBtnClick:(UIButton *)sender {
+    if (_mode.number >= _mode.overdueSize) {
+        _addBtn.selected = YES;
+        
+    } else{
+        
+        _addBtn.selected = NO;
+        _mode.number++;
+        if (_mode.number >= _mode.overdueSize) {
+            _addBtn.selected = YES;
+        }
+        _number.text = [NSString stringWithFormat:@"%li",(long)_mode.number];
+        _daiHuanBX.text = [NSString stringWithFormat:@"%.2f*%li期",_mode.principalInterest,(long)_mode.number];
+        
+        if (_mode.number <= 1) {
+            _subtractBtn.selected = YES;
+        } else {
+            _subtractBtn.selected = NO;
+        }
+    }
+    
+    if (numberAddBlock) {
+        numberAddBlock(_mode.number);
+    }
+    
+}
+- (void)subtractBtnClick:(UIButton *)sender {
+    if (_mode.number <= 1) {
+        
+        
+    } else {
+        _subtractBtn.selected = NO;
+        _mode.number--;
+        if (_mode.number <= 1) {
+            _subtractBtn.selected = YES;
+        }
+        
+        _number.text = [NSString stringWithFormat:@"%li",(long)_mode.number];
+        _daiHuanBX.text = [NSString stringWithFormat:@"%.2f*%li期",_mode.principalInterest,(long)_mode.number];
+        if (_mode.number >= _mode.overdueSize) {
+            _addBtn.selected = YES;
+        } else {
+           _addBtn.selected = NO;
+        }
+    }
+    
+    if (numberCutBlock) {
+        numberCutBlock(_mode.number);
+    }
+}
+
+- (void)chooseBtnClick:(UIButton *)sender {
+    sender.selected = !sender.selected;
+    if (cellSelectedBlock) {
+        cellSelectedBlock(sender.selected);
+    }
+}
+
+
+- (void)numberAddWithBlock:(LZNumberChangedBlock)block {
+    numberAddBlock = block;
+}
+
+- (void)numberCutWithBlock:(LZNumberChangedBlock)block {
+    numberCutBlock = block;
+}
+
+- (void)cellSelectedWithBlock:(LZCellSelectedBlock)block {
+    cellSelectedBlock = block;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

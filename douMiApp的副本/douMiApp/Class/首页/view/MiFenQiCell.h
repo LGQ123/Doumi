@@ -1,0 +1,36 @@
+//
+//  MiFenQiCell.h
+//  douMiApp
+//
+//  Created by ydz on 2017/1/10.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+@class DM_CircleView,DMMeXinModel;
+
+@protocol miFenQiDelegate <NSObject>
+
+@optional
+- (void)brushLiRecordDelegate;
+- (void)brushLiDelegate;
+- (void)refundDelegate;
+
+@end
+
+@interface MiFenQiCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UILabel *usableMoney;
+@property (weak, nonatomic) IBOutlet UILabel *allLimit;
+@property (weak, nonatomic) IBOutlet UILabel *interest;
+@property (weak, nonatomic) IBOutlet UIView *allLimitLine;
+@property (weak, nonatomic) IBOutlet UIView *brushLi;
+@property (weak, nonatomic) IBOutlet UIButton *brushLiBtn;
+@property (weak, nonatomic) IBOutlet UILabel *delayMoney;
+@property (weak, nonatomic) IBOutlet UIButton *refundBtn;
+@property (strong, nonatomic) DM_CircleView *cricleView;
+@property (weak, nonatomic) IBOutlet UIView *myView;
+@property (weak, nonatomic) IBOutlet UIImageView *myImageView;
+@property (strong, nonatomic) DMMeXinModel *mode;
+@property (weak, nonatomic) id<miFenQiDelegate>delegate;
+
+@end

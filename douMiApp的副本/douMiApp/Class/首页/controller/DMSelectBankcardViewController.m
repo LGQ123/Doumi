@@ -1,0 +1,156 @@
+//
+//  DMSelectBankcardViewController.m
+//  douMiApp
+//
+//  Created by edz on 2017/1/16.
+//  Copyright © 2017年 lgq. All rights reserved.
+//
+
+#import "DMSelectBankcardViewController.h"
+#import "UILabel+ChangeLineSpaceAndWordSpace.h"
+#import "UIImage+MostColor.h"
+#import "BoundClipController.h"
+#import "DMMiFenQiViewController.h"
+#import "AuditViewController.h"
+#import "ShouXinMoe.h"
+#define buttonH 121
+#define margin 10
+#define fieldW (SCREEN_WIDTH-96)/4
+#define iconWH 51
+
+@interface DMSelectBankcardViewController ()
+
+@property (nonatomic, strong) NSMutableArray *fieldArray;
+
+@end
+
+@implementation DMSelectBankcardViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [self.navigationController.navigationBar setShadowImage:nil];
+    [[[self.navigationController.navigationBar subviews] objectAtIndex:0] setAlpha:1];
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [MobClick endEvent:@"MFQBackCard"];
+    
+    _fieldArray = [NSMutableArray array];
+
+    [self addItem:nitem_left btnTitleArr:@[@"back"]];
+    self.lable.textColor = RGBA(40, 40, 40, 1);
+    if (_isBindBankcard) {
+        self.lable.text = @"确认银行卡";
+    } else {
+        self.lable.text = @"选择验证的银行卡";
+    }
+    
+    
+    if (!_isBindBankcard) {
+        
+        UILabel *noticeLab = [self getLabelWithFrame:CGRectMake(0, 120, SCREEN_WIDTH, 40) andText:@"申请开通蜜分期的账户需要进行银行卡绑定 \n 请您绑定银行卡后再进行蜜分期认证" andTextcolor:RGBA(40, 40, 40, 1) andFont:DMFont(12) andNumberline:0];
+        noticeLab.textAlignment = NSTextAlignmentCenter;
+        [self.view addSubview:noticeLab];
+        
+        UIButton *bindBtn = [self getButtonWithFrame:CGRectMake(42, 200, SCREEN_WIDTH-84, 41) andText:@"去绑定银行卡"];
+        [bindBtn addTarget:self action:@selector(bindButtonClick) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:bindBtn];
+        
+    } else {
+        
+        UIView *bankView = [[UIView alloc] initWithFrame:CGRectMake(14, 78, SCREEN_WIDTH-28, 121)];
+        [self.view addSubview:bankView];
+        
+        UIImageView *iconImage = [[UIImageView alloc] initWithFrame:CGRectMake(20, 20, iconWH, iconWH)];
+//        [iconImage sd_setImageWithURL:[NSURL URLWithString:_bankInfoModel.bankInfo]];
+        [iconImage sd_setImageWithURL:[NSURL URLWithString:_bankInfoModel.bankInfo] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+             bankView.backgroundColor = [UIImage mostColor:iconImage.image];
+        }];
+        [bankView addSubview:iconImage];
+        
+       
+        
+        UILabel *bankName = [[UILabel alloc] initWithFrame:CGRectMake(iconImage.mj_x+iconImage.mj_w+10, 30, 100, 20)];
+        bankName.backgroundColor = [UIColor clearColor];
+        bankName.text = _bankInfoModel.bank;
+        bankName.textColor = [UIColor whiteColor];
+        bankName.font = DMFont(16);
+        [bankView addSubview:bankName];
+        
+        UILabel *bankNo = [[UILabel alloc] initWithFrame:CGRectMake(20, bankView.mj_h-20-25, bankView.mj_w-40, 25)];
+        bankNo.backgroundColor = [UIColor clearColor];
+        bankNo.text = _bankInfoModel.bankCard;
+        bankNo.textColor = [UIColor whiteColor];
+        bankNo.font = DMFontBold(30);
+        bankNo.textAlignment = NSTextAlignmentRight;
+        [bankView addSubview:bankNo];
+        
+        
+        UIButton *finishBtn = [self getButtonWithFrame:CGRectMake(14, bankView.mj_y+bankView.mj_h+50, SCREEN_WIDTH-28, 41) andText:@"完成"];
+        [finishBtn addTarget:self action:@selector(finishButtonClick) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:finishBtn];
+        
+    }
+}
+
+
+- (void)bindButtonClick {
+    BoundClipController *boundClip = [[BoundClipController alloc] init];
+    boundClip.type = @"bind";
+    [self.navigationController pushViewController:boundClip animated:YES];
+}
+
+
+- (void)finishButtonClick {
+    NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+    [dic dm_setObject:@"DMHY500016" forKey:@"iface"];
+    [dic dm_setObject:[BusinessLogic uuid] forKey:@"userId"];
+    [NetworkRequest post:serVerIP params:dic success:^(id responseObj) {
+        ShouXinMoe *mode = [ShouXinMoe mj_objectWithKeyValues:responseObj];
+        if ([responseObj[@"rescode"] isEqualToString:@"0000"]) {
+            [MobClick endEvent:@"MFQOver"];
+            if (mode.creditResult.success == 1) {
+                DMMiFenQiViewController *dmMFQVC = [[DMMiFenQiViewController alloc] initWithNibName:@"DMMiFenQiViewController" bundle:nil];
+                [self.navigationController pushViewController:dmMFQVC animated:YES];
+            } else {
+                AuditViewController *auditVC = [[AuditViewController alloc] initWithNibName:@"AuditViewController" bundle:nil];
+                [self.navigationController pushViewController:auditVC animated:YES];
+            }
+        }
+    } failure:^(NSError *error) {
+        
+    }];
+}
+
+
+- (UIButton *)getButtonWithFrame:(CGRect)frame andText:(NSString *)text {
+    UIButton *finishBtn = [[UIButton alloc] initWithFrame:frame];
+    finishBtn.backgroundColor = RGBA(60, 60, 60, 1);
+    finishBtn.titleLabel.font = DMFont(12);
+    [finishBtn setTitle:text forState:UIControlStateNormal];
+    [finishBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    return finishBtn;
+}
+
+
+- (UILabel *)getLabelWithFrame:(CGRect)frame andText:(NSString *)text andTextcolor:(UIColor *)textColor andFont:(UIFont *)font andNumberline:(int)number {
+    UILabel *label = [[UILabel alloc] initWithFrame:frame];
+    label.backgroundColor = [UIColor clearColor];
+    label.numberOfLines = number;
+    label.text = text;
+    label.textColor = textColor;
+    label.font = font;
+    return label;
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+
+@end
